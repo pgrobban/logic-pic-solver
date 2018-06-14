@@ -1,0 +1,32 @@
+{
+  "name": "logic-pic-solver",
+  "version": "0.1.0",
+  "description": "Solver for Logic Pic http://tappsgames.com/app/logic-pic/",
+  "main": "index.js",
+  "scripts": {
+    "start": "babel-node --presets env index.js",
+    "test": "mocha --require babel-register test"
+  },
+  "author": "pgrobban",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
+    "mocha": "^5.2.0",
+    "rewire": "^4.0.1",
+    "should": "^13.2.1"
+  },
+  "babel": {
+    "presets": [
+      [
+        "env",
+        {
+          "targets": {
+            "node": "current"
+          }
+        }
+      ]
+    ]
+  }
+}
