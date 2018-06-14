@@ -1,3 +1,5 @@
+import { countBy, sum, sumBy, filter } from 'lodash';
+
 function findDirectSolutionForRow(rowValues, solution, rowIndex) {
   // see if we can fill the whole row with X
   if (rowValues.length === 1 && rowValues[0] === 0) {
@@ -20,10 +22,34 @@ function findDirectSolutionForColumn(columnValues, solution, columnIndex) {
   }
 }
 
-function isValidSolution(columns, rows, solution) {
-  fillInMissingCellsWithX(solution);
+function isValidSolution(level, solution) {
+  const { columns, rows } = level;
 
-  return false;
+  const rowsValid = solution.every((row, index) => {
+    const solutionOsInRow = sumBy(row, cell => cell === 'O');
+    const expectedOsInRow = sum(rows[index]);
+    return solutionOsInRow === expectedOsInRow;
+  });
+
+  if (!rowsValid) {
+    return false;
+  }
+
+  for (let column = 0; column < columns.length; column++) {
+    let solutionOsInColumn = 0;
+    for (let row = 0; row < rows.length; row++) {
+      if (solution[row][column] === 'O') {
+        solutionOsInColumn++;
+      }
+    }
+
+    const expectedOsInColumn = sum(columns[column]);
+    if (solutionOsInColumn !== expectedOsInColumn) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
 function fillInMissingCellsWithX(solution) {
@@ -35,10 +61,13 @@ function fillInMissingCellsWithX(solution) {
       }
     }
   }
+
   return solution;
 }
 
-export default function solve(columns, rows) {
+export default function solve(level) {
+  const { columns, rows } = level;
+
   if (columns.length !== rows.length) {
     throw new Error('COlumns and rows lengths must match');
   }
@@ -50,7 +79,7 @@ export default function solve(columns, rows) {
   rows.forEach((row, index) => findDirectSolutionForRow(row, solution, index));
   columns.forEach((column, index) => findDirectSolutionForColumn(column, solution, index));
 
-  if (isValidSolution(columns, rows, solution)) {
+  if (isValidSolution(level, solution)) {
     return fillInMissingCellsWithX(solution);
   }
   return fillInMissingCellsWithX(solution);
