@@ -2,32 +2,12 @@ import rewire from 'rewire';
 import solve from '../index';
 /* eslint-disable-next-line */
 import should from 'should';
+import LEVELS from './levels';
 
 const app = rewire('../index');
 
 const isValidSolution = app.__get__('isValidSolution');
 const fillInMissingCellsWithX = app.__get__('fillInMissingCellsWithX');
-
-const LEVELS = {
-  FIRST_STEPS: [
-    {
-      columns: [
-        [3],
-        [3],
-        [3],
-        [5],
-        [3]
-      ],
-      rows: [
-        [1],
-        [1],
-        [5],
-        [5],
-        [5]
-      ]
-    }
-  ]
-}
 
 describe('fillInMissingCellsWithX', () => {
   it('test case 1', () => {
@@ -99,20 +79,6 @@ describe('Solver', () => {
   });
 
   it.skip('Should solve First steps 2', () => {
-    const columns = [
-      [2],
-      [3],
-      [5],
-      [3],
-      [2]
-    ];
-    const rows = [
-      [3],
-      [5],
-      [5],
-      [1],
-      [1]
-    ];
     const expectedSolution = [
       ['X', 'O', 'O', 'O', 'X'],
       ['O', 'O', 'O', 'O', 'O'],
@@ -120,7 +86,20 @@ describe('Solver', () => {
       ['X', 'X', 'O', 'X', 'X'],
       ['X', 'X', 'O', 'X', 'X']
     ];
-    const actualSolution = solve(columns, rows);
+    const actualSolution = solve(LEVELS.FIRST_STEPS[1]);
+    should.deepEqual(expectedSolution, actualSolution);
+  });
+
+
+  it('Should solve First steps 3', () => {
+    const expectedSolution = [
+      ['X', 'O', 'O', 'X', 'X'],
+      ['X', 'O', 'O', 'O', 'X'],
+      ['X', 'O', 'O', 'O', 'O'],
+      ['O', 'O', 'O', 'O', 'O'],
+      ['X', 'O', 'O', 'O', 'X']
+    ];
+    const actualSolution = solve(LEVELS.FIRST_STEPS[2]);
     should.deepEqual(expectedSolution, actualSolution);
   });
 })
