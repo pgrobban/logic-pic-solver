@@ -8,6 +8,7 @@ const app = rewire('../index');
 
 const isValidSolution = app.__get__('isValidSolution');
 const fillInMissingCellsWithX = app.__get__('fillInMissingCellsWithX');
+const fillImpossibleMovesForRow = app.__get__('fillImpossibleMovesForRow');
 
 describe('fillInMissingCellsWithX', () => {
   it('test case 1', () => {
@@ -65,6 +66,71 @@ describe('Is valid solution', () => {
   });
 });
 
+describe.only('Fill in impossible moves for row', () => {
+  it('Test case 1', () => {
+    const solution = [
+      [undefined, undefined, undefined, 'O', undefined],
+      [],
+      [],
+      [],
+      []
+    ];
+    const expectedResult = [
+      ['X', undefined, undefined, 'O', undefined],
+      [],
+      [],
+      [],
+      []
+    ];
+    const rowValues = [3];
+    const rowIndex = 0;
+    fillImpossibleMovesForRow(rowValues, solution, rowIndex);
+    should.deepEqual(solution, expectedResult);
+  });
+
+  it('Test case 2', () => {
+    const solution = [
+      [undefined, undefined, undefined, undefined, 'O'],
+      [],
+      [],
+      [],
+      []
+    ];
+    const expectedResult = [
+      ['X', 'X', undefined, undefined, 'O'],
+      [],
+      [],
+      [],
+      []
+    ];
+    const rowValues = [3];
+    const rowIndex = 0;
+    fillImpossibleMovesForRow(rowValues, solution, rowIndex);
+    should.deepEqual(solution, expectedResult);
+  });
+
+  it('Test case 3', () => {
+    const solution = [
+      ['O', undefined, undefined, undefined, undefined],
+      [],
+      [],
+      [],
+      []
+    ];
+    const expectedResult = [
+      ['O', undefined, undefined, 'X', 'X'],
+      [],
+      [],
+      [],
+      []
+    ];
+    const rowValues = [3];
+    const rowIndex = 0;
+    fillImpossibleMovesForRow(rowValues, solution, rowIndex);
+    should.deepEqual(solution, expectedResult);
+  });
+})
+
 describe('Solver', () => {
   it('Should solve First steps 1', () => {
     const expectedSolution = [
@@ -78,7 +144,7 @@ describe('Solver', () => {
     should.deepEqual(expectedSolution, actualSolution);
   });
 
-  it.skip('Should solve First steps 2', () => {
+  it('Should solve First steps 2', () => {
     const expectedSolution = [
       ['X', 'O', 'O', 'O', 'X'],
       ['O', 'O', 'O', 'O', 'O'],

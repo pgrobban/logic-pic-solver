@@ -52,9 +52,52 @@ function isValidSolution(level, solution) {
   return true;
 }
 
+function fillImpossibleMovesForRow(rowValues, solution, rowIndex) {
+  if (rowValues.length === 1) {
+    if (rowValues[0] === 0) {
+      solution[rowIndex] = solution[rowIndex].fill('X');
+    } else {
+      const foundFirstNonEmptyCellIndex = solution[rowIndex].findIndex((cell) => cell !== undefined);
+      if (foundFirstNonEmptyCellIndex !== -1) { // fill in rowValues [3], solution row [ , , O, , ] => [X, , O, , X]
+        // try to fill left and right with possible X
+        // then replace all non-possible O cells with X
+        // replace all possible-O with undefined
+
+        let cellsFilledTotal = 1;
+        // try to fill to right
+        let numberOfPossibleOToFillInOneDirection = parseInt((rowValues[0] - 1) / 2);
+        if (foundFirstNonEmptyCellIndex === 0) {
+          numberOfPossibleOToFillInOneDirection++;
+        }
+
+        for (let cellIndex = foundFirstNonEmptyCellIndex + 1, cellsFilledWithPossibleO = 0;
+          cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < solution.length;
+          cellIndex++, cellsFilledWithPossibleO++, cellsFilledTotal++) {
+          solution[rowIndex][cellIndex] = 'Possible O';
+        }
+
+        // try to fill to left
+        for (let cellIndex = foundFirstNonEmptyCellIndex - 1, cellsFilledWithPossibleO = 0;
+          cellIndex >= 0 && cellsFilledWithPossibleO <= numberOfPossibleOToFillInOneDirection && cellsFilledTotal <= rowValues[0];
+          cellIndex--, cellsFilledWithPossibleO++, cellsFilledTotal++) {
+          solution[rowIndex][cellIndex] = 'Possible O';
+        }
+
+        solution[rowIndex].forEach((cell, cellIndex) => {
+          if (cell === undefined || cell === 'X') {
+            solution[rowIndex][cellIndex] = 'X';
+          } else if (cell === 'Possible O') {
+            solution[rowIndex][cellIndex] = undefined;
+          }
+        });
+      }
+    }
+  }
+}
+
 function fillInMissingCellsWithX(solution) {
   for (const row in solution) {
-    for (let column = 0; column < solution[row].length; column++) { // can't foreach her for possible undefined
+    for (let column = 0; column < solution[row].length; column++) { // can't foreach here for possible undefined
       const cell = solution[row][column];
       if (!cell) {
         solution[row][column] = 'X';
@@ -82,6 +125,10 @@ export default function solve(level) {
   if (isValidSolution(level, solution)) {
     return fillInMissingCellsWithX(solution);
   }
+
+  rows.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
+
+
   return fillInMissingCellsWithX(solution);
 }
 
