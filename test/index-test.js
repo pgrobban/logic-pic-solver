@@ -243,7 +243,7 @@ describe('Solver', () => {
     should.deepEqual(expectedSolution, actualSolution);
   });
 
-  it.skip('Should solve First steps 3', () => {
+  it('Should solve First steps 3', () => {
     const expectedSolution = [
       ['X', 'O', 'O', 'X', 'X'],
       ['X', 'O', 'O', 'O', 'X'],

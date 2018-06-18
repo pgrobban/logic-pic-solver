@@ -93,8 +93,8 @@ function isValidSolution(level, solution) {
   return true;
 }
 
-function fillPossibleOFromMiddlePlusOneToRight(foundFirstNonEmptyCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex) {
-  let cellIndex = foundFirstNonEmptyCellIndex + 1;
+function fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex) {
+  let cellIndex = foundFirstOCellIndex + 1;
   for (let cellsFilledWithPossibleO = 0;
     numberOfPossibleOToFillInOneDirection > 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < solution.length;
     cellIndex++ , cellsFilledWithPossibleO++) {
@@ -112,8 +112,8 @@ function fillPossibleOFromMiddlePlusOneToRight(foundFirstNonEmptyCellIndex, numb
   }
 }
 
-function fillPossibleOFromMiddleMinusOneToLeft(foundFirstNonEmptyCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex) {
-  let cellIndex = foundFirstNonEmptyCellIndex - 1;
+function fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex) {
+  let cellIndex = foundFirstOCellIndex - 1;
 
   for (let cellsFilledWithPossibleO = 0;
     numberOfPossibleOToFillInOneDirection >= 1 && // since we include middle
@@ -133,9 +133,9 @@ function fillPossibleOFromMiddleMinusOneToLeft(foundFirstNonEmptyCellIndex, numb
   }
 }
 
-function fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstNonEmptyCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex) {
+function fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex) {
   const columnAsArray = solution.map((row) => row[columnIndex]);
-  let cellIndex = foundFirstNonEmptyCellIndex + 1;
+  let cellIndex = foundFirstOCellIndex + 1;
 
   for (let cellsFilledWithPossibleO = 0;
     numberOfPossibleOToFillInOneDirection > 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < solution.length;
@@ -157,9 +157,9 @@ function fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstNonEmptyCellIndex, n
 }
 
 
-function fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstNonEmptyCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex) {
+function fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex) {
   const columnAsArray = solution.map((row) => row[columnIndex]);
-  let cellIndex = foundFirstNonEmptyCellIndex - 1;
+  let cellIndex = foundFirstOCellIndex - 1;
 
   // try to fill to left with possible Os
   for (let cellsFilledWithPossibleO = 0;
@@ -185,11 +185,11 @@ function fillImpossibleMovesForRow(rowHints, solution, rowIndex) {
     if (rowHints[0] === 0) {
       solution[rowIndex] = solution[rowIndex].fill('X');
     } else {
-      const foundFirstNonEmptyCellIndex = solution[rowIndex].findIndex((cell) => cell !== undefined);
-      if (foundFirstNonEmptyCellIndex !== -1) {
+      const foundFirstOCellIndex = solution[rowIndex].findIndex((cell) => cell === 'O');
+      if (foundFirstOCellIndex !== -1) {
         const numberOfPossibleOToFillInOneDirection = rowHints[0] - 1;
-        fillPossibleOFromMiddlePlusOneToRight(foundFirstNonEmptyCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex);
-        fillPossibleOFromMiddleMinusOneToLeft(foundFirstNonEmptyCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex);
+        fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex);
+        fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex);
 
         solution[rowIndex].forEach((cell, cellIndex) => {
           if (cell === 'Possible O') {
@@ -209,12 +209,12 @@ function fillImpossibleMovesForColumn(columnHints, solution, columnIndex) {
       });
     } else {
       const columnAsArray = solution.map((row) => row[columnIndex]);
-      const foundFirstNonEmptyCellIndex = columnAsArray.findIndex((cell) => cell !== undefined);
+      const foundFirstOCellIndex = columnAsArray.findIndex((cell) => cell === 'O');
 
-      if (foundFirstNonEmptyCellIndex !== -1) {
+      if (foundFirstOCellIndex !== -1) {
         const numberOfPossibleOToFillInOneDirection = columnHints[0] - 1;
-        fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstNonEmptyCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex);
-        fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstNonEmptyCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex);
+        fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex);
+        fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex);
 
         solution.forEach((row, rowIndex) => {
           if (row[columnIndex] === 'Possible O') {
@@ -257,6 +257,7 @@ export default function solve(level) {
   if (isValidSolution(level, solution)) {
     return fillInMissingCellsWithX(solution);
   }
+
 
   rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
   columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
