@@ -9,16 +9,17 @@ function isArrayConsecutive(arr) {
   return true;
 }
 
+function columnToSolution(columnAsArray, columnIndex, solution) {
+  for (let rowIndex = 0; rowIndex < solution.length; rowIndex++) {
+    solution[rowIndex][columnIndex] = columnAsArray[rowIndex];
+  }
+}
+
 function findDirectSolutionForRow(rowHints, solution, rowIndex) {
   // see if we can fill the whole row with X
   if (rowHints.length === 1 && rowHints[0] === 0) {
     solution[rowIndex] = solution.map(col => 'X');
   }
-  /* // see if we can fill the whole row with O
-  if (rowHints.length === 1 && rowHints[0] === solution.length) {
-    solution[rowIndex] = solution.map(col => 'O');
-  } */
-
   // try solve simple case: eg rowHint [3] and solution row [X, undefined, O, undefined, X] then we can fill in like so [X, O, O, O, X]
   // first find the indices
   const knownXAndUnknownIndicesForRow = solution[rowIndex].reduce((accumulator, currentValue, currentIndex) => {
@@ -37,14 +38,29 @@ function findDirectSolutionForRow(rowHints, solution, rowIndex) {
 }
 
 function findDirectSolutionForColumn(columnHints, solution, columnIndex) {
-  // see if we can fill the whole column with X
+  // see if we can fill the whole row with X
   if (columnHints.length === 1 && columnHints[0] === 0) {
-    solution.forEach((row, rowIndex) => solution[rowIndex][columnIndex] = 'X');
+    solution.forEach((row, rowIndex) => {
+      solution[rowIndex][columnIndex] = 'X';
+    });
   }
-  // see if we can fill the whole column with O
-  if (columnHints.length === 1 && columnHints[0] === solution.length) {
-    solution.forEach((row, rowIndex) => solution[rowIndex][columnIndex] = 'O');
+  const columnAsArray = solution.map((row) => row[columnIndex]);
+  // try solve simple case: eg rowHint [3] and solution row [X, undefined, O, undefined, X] then we can fill in like so [X, O, O, O, X]
+  // first find the indices
+  const knownXAndUnknownIndicesForColumn = columnAsArray.reduce((accumulator, currentValue, currentIndex) => {
+    if (currentValue !== 'X') {
+      accumulator.push(currentIndex);
+    }
+    return accumulator;
+  }, []);
+  // if the indices are consecutive, then we know we have a unique solution
+  if (columnHints[0] === knownXAndUnknownIndicesForColumn.length && isArrayConsecutive(knownXAndUnknownIndicesForColumn)) {
+    // so we can replace all cells with those indices with O
+    for (let i = 0; i < knownXAndUnknownIndicesForColumn.length; i++) {
+      columnAsArray[knownXAndUnknownIndicesForColumn[i]] = 'O';
+    }
   }
+  columnToSolution(columnAsArray, columnIndex, solution);
 }
 
 function isValidSolution(level, solution) {
@@ -82,7 +98,9 @@ function fillPossibleOFromMiddlePlusOneToRight(foundFirstNonEmptyCellIndex, numb
   for (let cellsFilledWithPossibleO = 0;
     numberOfPossibleOToFillInOneDirection > 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < solution.length;
     cellIndex++ , cellsFilledWithPossibleO++) {
-    solution[rowIndex][cellIndex] = 'Possible O';
+    if (!solution[rowIndex][cellIndex]) {
+      solution[rowIndex][cellIndex] = 'Possible O';
+    }
   }
 
   // we know the rest is impossible so fill with X
@@ -101,7 +119,9 @@ function fillPossibleOFromMiddleMinusOneToLeft(foundFirstNonEmptyCellIndex, numb
     numberOfPossibleOToFillInOneDirection >= 1 && // since we include middle
     cellIndex >= 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < solution.length;
     cellIndex-- , cellsFilledWithPossibleO++) {
-    solution[rowIndex][cellIndex] = 'Possible O';
+    if (!solution[rowIndex][cellIndex]) {
+      solution[rowIndex][cellIndex] = 'Possible O';
+    }
   }
 
   // we know the rest is impossible so fill with X
@@ -120,7 +140,9 @@ function fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstNonEmptyCellIndex, n
   for (let cellsFilledWithPossibleO = 0;
     numberOfPossibleOToFillInOneDirection > 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < solution.length;
     cellIndex++ , cellsFilledWithPossibleO++) {
-    columnAsArray[cellIndex] = 'Possible O';
+    if (!columnAsArray[cellIndex]) {
+      columnAsArray[cellIndex] = 'Possible O';
+    }
   }
 
   // we know the rest is impossible so fill with X
@@ -128,12 +150,10 @@ function fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstNonEmptyCellIndex, n
     if (columnAsArray[cellIndex] !== 'O') {
       columnAsArray[cellIndex] = 'X';
     }
-    cellIndex--;
+    cellIndex++;
   }
 
-  for (let rowIndex = 0; rowIndex < solution.length; rowIndex++) {
-    solution[rowIndex][columnIndex] = columnAsArray[rowIndex];
-  }
+  columnToSolution(columnAsArray, columnIndex, solution);
 }
 
 
@@ -145,7 +165,9 @@ function fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstNonEmptyCellIndex
   for (let cellsFilledWithPossibleO = 0;
     numberOfPossibleOToFillInOneDirection > 0 && cellIndex >= 0 && cellsFilledWithPossibleO < numberOfPossibleOToFillInOneDirection;
     cellIndex-- , cellsFilledWithPossibleO++) {
-    columnAsArray[cellIndex] = 'Possible O';
+    if (!columnAsArray[cellIndex]) {
+      columnAsArray[cellIndex] = 'Possible O';
+    }
   }
 
   // we know the rest is impossible so fill with X
@@ -155,10 +177,7 @@ function fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstNonEmptyCellIndex
     }
     cellIndex--;
   }
-
-  for (let rowIndex = 0; rowIndex < solution.length; rowIndex++) {
-    solution[rowIndex][columnIndex] = columnAsArray[rowIndex];
-  }
+  columnToSolution(columnAsArray, columnIndex, solution);
 }
 
 function fillImpossibleMovesForRow(rowHints, solution, rowIndex) {
@@ -235,22 +254,18 @@ export default function solve(level) {
   rowHints.forEach((row, index) => findDirectSolutionForRow(row, solution, index));
   columnHints.forEach((column, index) => findDirectSolutionForColumn(column, solution, index));
 
-  console.log('*** AFTER 1', solution);
-
-
   if (isValidSolution(level, solution)) {
     return fillInMissingCellsWithX(solution);
   }
 
   rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
-  console.log('*** AFTER 2', solution);
-
   columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
-  console.log('*** AFTER 3', solution);
 
   rowHints.forEach((row, index) => findDirectSolutionForRow(row, solution, index));
+  columnHints.forEach((column, index) => findDirectSolutionForColumn(column, solution, index));
+
   if (isValidSolution(level, solution)) {
-    return fillInMissingCellsWithX;
+    return fillInMissingCellsWithX(solution);
   }
 
   return fillInMissingCellsWithX(solution);
