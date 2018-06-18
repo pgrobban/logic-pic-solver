@@ -83,9 +83,9 @@ describe('Fill in impossible moves for row', () => {
       [],
       []
     ];
-    const rowValues = [3];
+    const rowHints = [3];
     const rowIndex = 0;
-    fillImpossibleMovesForRow(rowValues, solution, rowIndex);
+    fillImpossibleMovesForRow(rowHints, solution, rowIndex);
     should.deepEqual(solution, expectedResult);
   });
 
@@ -104,9 +104,9 @@ describe('Fill in impossible moves for row', () => {
       [],
       []
     ];
-    const rowValues = [3];
+    const rowHints = [3];
     const rowIndex = 0;
-    fillImpossibleMovesForRow(rowValues, solution, rowIndex);
+    fillImpossibleMovesForRow(rowHints, solution, rowIndex);
     should.deepEqual(solution, expectedResult);
   });
 
@@ -125,11 +125,32 @@ describe('Fill in impossible moves for row', () => {
       [],
       []
     ];
-    const rowValues = [3];
+    const rowHints = [3];
     const rowIndex = 0;
-    fillImpossibleMovesForRow(rowValues, solution, rowIndex);
+    fillImpossibleMovesForRow(rowHints, solution, rowIndex);
     should.deepEqual(solution, expectedResult);
   });
+
+  it('Test case 4', () => {
+    const solution = [
+      [undefined, undefined, 'O', undefined, undefined],
+      [],
+      [],
+      [],
+      []
+    ];
+    const expectedResult = [
+      ['X', undefined, 'O', undefined, 'X'],
+      [],
+      [],
+      [],
+      []
+    ];
+    const rowHints = [2];
+    const rowIndex = 0;
+    fillImpossibleMovesForRow(rowHints, solution, rowIndex);
+    should.deepEqual(solution, expectedResult);
+  })
 });
 
 describe('Fill in impossible moves for column', () => {
