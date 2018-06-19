@@ -314,4 +314,16 @@ describe('Solver', () => {
     const actualSolution = solve(LEVELS.FIRST_STEPS[7]);
     should.deepEqual(expectedSolution, actualSolution);
   });
+
+  it('Should solve First steps 9', () => {
+    const expectedSolution = [
+      ['O', 'O', 'O', 'X', 'O'],
+      ['O', 'O', 'X', 'X', 'X'],
+      ['O', 'X', 'O', 'X', 'O'],
+      ['X', 'X', 'X', 'O', 'O'],
+      ['O', 'X', 'O', 'O', 'O']
+    ];
+    const actualSolution = solve(LEVELS.FIRST_STEPS[8]);
+    should.deepEqual(expectedSolution, actualSolution);
+  });
 })
