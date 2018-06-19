@@ -27,6 +27,20 @@ function tryFindDirectSolutionForRow(rowHints, solution, rowIndex) {
         solution[rowIndex] = rowFilledUnknownWithX;
       }
     }
+  } else {
+    const rowHintsSum = rowHints.reduce((accumulator, currentValue, currentIndex) => {
+      return accumulator + currentValue + (currentIndex === rowHints.length - 1 ? 0 : 1);
+    }, 0);
+    if (rowHintsSum === solution.length) {
+      let fillIndex = 0;
+      for (let rowHintsIndex = 0; rowHintsIndex < rowHints.length; rowHintsIndex++) {
+        for (let hintCell = 0; hintCell < rowHints[rowHintsIndex]; hintCell++) {
+          solution[rowIndex][fillIndex] = 'O';
+          fillIndex++;
+        }
+        fillIndex++;
+      }
+    }
   }
 }
 
@@ -50,21 +64,35 @@ function tryFindSequentialSolutionForRow(rowHints, solution, rowIndex) {
 }
 
 function tryFindDirectSolutionForColumn(columnHints, solution, columnIndex) {
+  let columnAsArray = solution.map((row) => row[columnIndex]);
   if (columnHints.length === 1) {
     if (columnHints[0] === 0) {
       solution.forEach((row, rowIndex) => {
         solution[rowIndex][columnIndex] = 'X';
       });
     } else {
-      let columnAsArray = solution.map((row) => row[columnIndex]);
       const numberOfOInColumn = columnAsArray.filter((cell) => cell === 'O').length;
       if (numberOfOInColumn === columnHints[0]) {
         const columnFilledUnknownWithX = columnAsArray.map((cell) => cell === 'O' ? 'O' : 'X');
         columnAsArray = columnFilledUnknownWithX;
-        columnToSolution(columnAsArray, columnIndex, solution);
+      }
+    }
+  } else {
+    const columnHintsSum = columnHints.reduce((accumulator, currentValue, currentIndex) => {
+      return accumulator + currentValue + (currentIndex === columnHints.length - 1 ? 0 : 1);
+    }, 0);
+    if (columnHintsSum === solution.length) {
+      let fillIndex = 0;
+      for (let columnHintsIndex = 0; columnHintsIndex < columnHints.length; columnHintsIndex++) {
+        for (let hintCell = 0; hintCell < columnHints[columnHintsIndex]; hintCell++) {
+          columnAsArray[fillIndex] = 'O';
+          fillIndex++;
+        }
+        fillIndex++;
       }
     }
   }
+  columnToSolution(columnAsArray, columnIndex, solution);
 }
 
 function tryFindSequentialSolutionForColumn(columnHints, solution, columnIndex) {
