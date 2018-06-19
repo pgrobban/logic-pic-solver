@@ -15,12 +15,22 @@ function columnToSolution(columnAsArray, columnIndex, solution) {
   }
 }
 
-function findDirectSolutionForRow(rowHints, solution, rowIndex) {
+function tryFindDirectSolutionForRow(rowHints, solution, rowIndex) {
   // see if we can fill the whole row with X
-  if (rowHints.length === 1 && rowHints[0] === 0) {
-    solution[rowIndex] = solution.map(col => 'X');
-    return;
+  if (rowHints.length === 1) {
+    if (rowHints[0] === 0) {
+      solution[rowIndex] = solution.map(col => 'X');
+    } else {
+      const numberOfOInRow = solution[rowIndex].filter((cell) => cell === 'O').length;
+      if (numberOfOInRow === rowHints[0]) {
+        const rowFilledUnknownWithX = solution[rowIndex].map((cell) => cell === 'O' ? 'O' : 'X');
+        solution[rowIndex] = rowFilledUnknownWithX;
+      }
+    }
   }
+}
+
+function tryFindSequentialSolutionForRow(rowHints, solution, rowIndex) {
   // try solve simple case: eg rowHint [3] and solution row [X, undefined, O, undefined, X] then we can fill in like so [X, O, O, O, X]
   // first find the indices
   const knownXAndUnknownIndicesForRow = solution[rowIndex].reduce((accumulator, currentValue, currentIndex) => {
@@ -29,6 +39,7 @@ function findDirectSolutionForRow(rowHints, solution, rowIndex) {
     }
     return accumulator;
   }, []);
+
   // if the indices are consecutive, then we know we have a unique solution
   if (rowHints[0] === knownXAndUnknownIndicesForRow.length && isArrayConsecutive(knownXAndUnknownIndicesForRow)) {
     // so we can replace all cells with those indices with O
@@ -38,14 +49,25 @@ function findDirectSolutionForRow(rowHints, solution, rowIndex) {
   }
 }
 
-function findDirectSolutionForColumn(columnHints, solution, columnIndex) {
-  // see if we can fill the whole row with X
-  if (columnHints.length === 1 && columnHints[0] === 0) {
-    solution.forEach((row, rowIndex) => {
-      solution[rowIndex][columnIndex] = 'X';
-    });
-    return;
+function tryFindDirectSolutionForColumn(columnHints, solution, columnIndex) {
+  if (columnHints.length === 1) {
+    if (columnHints[0] === 0) {
+      solution.forEach((row, rowIndex) => {
+        solution[rowIndex][columnIndex] = 'X';
+      });
+    } else {
+      let columnAsArray = solution.map((row) => row[columnIndex]);
+      const numberOfOInColumn = columnAsArray.filter((cell) => cell === 'O').length;
+      if (numberOfOInColumn === columnHints[0]) {
+        const columnFilledUnknownWithX = columnAsArray.map((cell) => cell === 'O' ? 'O' : 'X');
+        columnAsArray = columnFilledUnknownWithX;
+        columnToSolution(columnAsArray, columnIndex, solution);
+      }
+    }
   }
+}
+
+function tryFindSequentialSolutionForColumn(columnHints, solution, columnIndex) {
   const columnAsArray = solution.map((row) => row[columnIndex]);
   // try solve simple case: eg rowHint [3] and solution row [X, undefined, O, undefined, X] then we can fill in like so [X, O, O, O, X]
   // first find the indices
@@ -253,8 +275,8 @@ export default function solve(level) {
   let solution = [...Array(columnHints.length)];
   solution = solution.map(row => [...Array(columnHints.length)]);
 
-  rowHints.forEach((row, index) => findDirectSolutionForRow(row, solution, index));
-  columnHints.forEach((column, index) => findDirectSolutionForColumn(column, solution, index));
+  rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
+  columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
 
   if (isValidSolution(level, solution)) {
     return fillInMissingCells(solution, 'X');
@@ -264,8 +286,20 @@ export default function solve(level) {
   rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
   columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
 
-  rowHints.forEach((row, index) => findDirectSolutionForRow(row, solution, index));
-  columnHints.forEach((column, index) => findDirectSolutionForColumn(column, solution, index));
+  rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
+  columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
+
+  if (isValidSolution(level, solution)) {
+    return fillInMissingCells(solution, 'X');
+  }
+
+  // next round
+
+  rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
+  columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
+
+  rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
+  columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
 
   if (isValidSolution(level, solution)) {
     return fillInMissingCells(solution, 'X');
