@@ -324,7 +324,7 @@ export default function solve(level) {
     return fillInMissingCells(solution, 'X');
   }
 
-  for (let round = 0; round < 5; round++) {
+  for (let round = 0; round < 2; round++) {
     rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
 
