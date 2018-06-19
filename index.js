@@ -38,6 +38,9 @@ function tryFindDirectSolutionForRow(rowHints, solution, rowIndex) {
           solution[rowIndex][fillIndex] = 'O';
           fillIndex++;
         }
+        if (fillIndex !== solution.length) {
+          solution[rowIndex][fillIndex] = 'X';
+        }
         fillIndex++;
       }
     }
@@ -321,20 +324,19 @@ export default function solve(level) {
     return fillInMissingCells(solution, 'X');
   }
 
-  // next round
+  for (let round = 0; round < 5; round++) {
+    rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
+    columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
 
-  rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
-  columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
+    rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
+    columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
 
-  rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
-  columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
-
-  if (isValidSolution(level, solution)) {
-    return fillInMissingCells(solution, 'X');
+    if (isValidSolution(level, solution)) {
+      return fillInMissingCells(solution, 'X');
+    }
   }
 
   console.log('Found no solution without guessing, returning partial solution');
-
   return fillInMissingCells(solution, '?');
 }
 
