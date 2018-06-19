@@ -7,7 +7,7 @@ import LEVELS from './levels';
 const app = rewire('../index');
 
 const isValidSolution = app.__get__('isValidSolution');
-const fillInMissingCellsWithX = app.__get__('fillInMissingCellsWithX');
+const fillInMissingCells = app.__get__('fillInMissingCells');
 const fillImpossibleMovesForRow = app.__get__('fillImpossibleMovesForRow');
 const fillImpossibleMovesForColumn = app.__get__('fillImpossibleMovesForColumn');
 
@@ -27,7 +27,7 @@ describe('fillInMissingCellsWithX', () => {
       ['O', 'O', 'O', 'O', 'O'],
       ['O', 'O', 'O', 'O', 'O']
     ];
-    const actualResult = fillInMissingCellsWithX(input);
+    const actualResult = fillInMissingCells(input, 'X');
     should.deepEqual(expectedResult, actualResult);
   });
 })
@@ -252,6 +252,18 @@ describe('Solver', () => {
       ['X', 'O', 'O', 'O', 'X']
     ];
     const actualSolution = solve(LEVELS.FIRST_STEPS[2]);
+    should.deepEqual(expectedSolution, actualSolution);
+  });
+
+  it.skip('Should solve First steps 4', () => {
+    const expectedSolution = [
+      ['X', 'X', 'O', 'O', 'O'],
+      ['X', 'X', 'O', 'O', 'O'],
+      ['X', 'O', 'X', 'O', 'O'],
+      ['O', 'O', 'O', 'O', 'O'],
+      ['X', 'O', 'O', 'O', 'O']
+    ];
+    const actualSolution = solve(LEVELS.FIRST_STEPS[3]);
     should.deepEqual(expectedSolution, actualSolution);
   });
 })

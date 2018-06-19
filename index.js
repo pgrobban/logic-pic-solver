@@ -19,6 +19,7 @@ function findDirectSolutionForRow(rowHints, solution, rowIndex) {
   // see if we can fill the whole row with X
   if (rowHints.length === 1 && rowHints[0] === 0) {
     solution[rowIndex] = solution.map(col => 'X');
+    return;
   }
   // try solve simple case: eg rowHint [3] and solution row [X, undefined, O, undefined, X] then we can fill in like so [X, O, O, O, X]
   // first find the indices
@@ -43,6 +44,7 @@ function findDirectSolutionForColumn(columnHints, solution, columnIndex) {
     solution.forEach((row, rowIndex) => {
       solution[rowIndex][columnIndex] = 'X';
     });
+    return;
   }
   const columnAsArray = solution.map((row) => row[columnIndex]);
   // try solve simple case: eg rowHint [3] and solution row [X, undefined, O, undefined, X] then we can fill in like so [X, O, O, O, X]
@@ -227,12 +229,12 @@ function fillImpossibleMovesForColumn(columnHints, solution, columnIndex) {
 }
 
 
-function fillInMissingCellsWithX(solution) {
+function fillInMissingCells(solution, fill = 'X') {
   for (const row in solution) {
     for (let column = 0; column < solution[row].length; column++) { // can't foreach here for possible undefined
       const cell = solution[row][column];
       if (!cell) {
-        solution[row][column] = 'X';
+        solution[row][column] = fill;
       }
     }
   }
@@ -255,7 +257,7 @@ export default function solve(level) {
   columnHints.forEach((column, index) => findDirectSolutionForColumn(column, solution, index));
 
   if (isValidSolution(level, solution)) {
-    return fillInMissingCellsWithX(solution);
+    return fillInMissingCells(solution, 'X');
   }
 
 
@@ -266,10 +268,12 @@ export default function solve(level) {
   columnHints.forEach((column, index) => findDirectSolutionForColumn(column, solution, index));
 
   if (isValidSolution(level, solution)) {
-    return fillInMissingCellsWithX(solution);
+    return fillInMissingCells(solution, 'X');
   }
 
-  return fillInMissingCellsWithX(solution);
+  console.log('Found no solution without guessing, returning partial solution');
+
+  return fillInMissingCells(solution, '?');
 }
 
 export function prettyPrint(solution) {
