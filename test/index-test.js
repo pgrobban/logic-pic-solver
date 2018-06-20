@@ -11,6 +11,121 @@ const fillInMissingCells = app.__get__('fillInMissingCells');
 const fillImpossibleMovesForRow = app.__get__('fillImpossibleMovesForRow');
 const fillImpossibleMovesForColumn = app.__get__('fillImpossibleMovesForColumn');
 const tryFindPartialSolutionForRow = app.__get__('tryFindPartialSolutionForRow');
+const tryFindSequentialSolutionForRow = app.__get__('tryFindSequentialSolutionForRow');
+const tryFindSequentialSolutionForColumn = app.__get__('tryFindSequentialSolutionForColumn');
+const tryFindDirectSolutionForRow = app.__get__('tryFindDirectSolutionForRow');
+const tryFindDirectSolutionForColumn = app.__get__('tryFindDirectSolutionForColumn');
+
+
+describe('try find direct solution for row', () => {
+  it('Test case 1', () => {
+    const input = [
+      ['X', undefined, undefined, undefined, 'X']
+    ];
+    const expectedResult = [
+      ['X', 'O', 'O', 'O', 'X']
+    ];
+    const rowHint = [3];
+    const rowIndex = 0;
+    tryFindDirectSolutionForRow(rowHint, input, rowIndex);
+    should.deepEqual(expectedResult, input);
+  });
+});
+
+describe('try find direct solution for column', () => {
+  it('Test case 1', () => {
+    const input = [
+      ['X'],
+      [undefined],
+      [undefined],
+      [undefined],
+      ['X']
+    ];
+    const expectedResult = [
+      ['X'],
+      ['O'],
+      ['O'],
+      ['O'],
+      ['X']
+    ];
+    const columnHint = [3];
+    const columnIndex = 0;
+    tryFindDirectSolutionForColumn(columnHint, input, columnIndex);
+    should.deepEqual(expectedResult, input);
+  });
+});
+
+describe('Try find sequential solution for row', () => {
+  it('test case 1', () => {
+    const input = [
+      ['O', undefined, undefined, undefined, undefined]
+    ];
+    const expectedResult = [
+      ['O', 'O', undefined, undefined, undefined]
+    ];
+    const rowHint = [2, 1];
+    const rowIndex = 0;
+    tryFindSequentialSolutionForRow(rowHint, input, rowIndex);
+    should.deepEqual(expectedResult, input);
+  });
+
+  it('test case 2', () => {
+    const input = [
+      [undefined, undefined, undefined, undefined, 'O']
+    ];
+    const expectedResult = [
+      [undefined, undefined, undefined, 'O', 'O']
+    ];
+    const rowHint = [1, 2];
+    const rowIndex = 0;
+    tryFindSequentialSolutionForRow(rowHint, input, rowIndex);
+    should.deepEqual(expectedResult, input);
+  });
+});
+
+describe('Try find sequential solution for column', () => {
+  it('test case 1', () => {
+    const input = [
+      ['O'],
+      [undefined],
+      [undefined],
+      [undefined],
+      [undefined],
+    ];
+    const expectedResult = [
+      ['O'],
+      ['O'],
+      [undefined],
+      [undefined],
+      [undefined],
+    ];
+    const columnHint = [2, 1];
+    const columnIndex = 0;
+    tryFindSequentialSolutionForColumn(columnHint, input, columnIndex);
+    should.deepEqual(expectedResult, input);
+  });
+
+  it('test case 2', () => {
+    const input = [
+      [undefined],
+      [undefined],
+      [undefined],
+      [undefined],
+      ['O']
+    ];
+    const expectedResult = [
+      [undefined],
+      [undefined],
+      [undefined],
+      ['O'],
+      ['O']
+    ];
+    const columnHint = [1, 2];
+    const columnIndex = 0;
+    tryFindSequentialSolutionForColumn(columnHint, input, columnIndex);
+    should.deepEqual(expectedResult, input);
+  });
+}),
 
 describe('fillInMissingCellsWithX', () => {
   it('test case 1', () => {
@@ -394,7 +509,7 @@ describe('Solver', () => {
   it('Should solve First steps 12', () => {
     const expectedSolution = [
       ['X', 'X', 'X', 'O', 'O'],
-      ['O', 'O', 'X', 'O', 'O'],
+      ['O', 'O', 'X', 'O', 'X'],
       ['O', 'O', 'O', 'O', 'X'],
       ['O', 'O', 'O', 'X', 'X'],
       ['O', 'X', 'O', 'X', 'X']

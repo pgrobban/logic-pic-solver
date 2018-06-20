@@ -26,23 +26,31 @@ function tryFindDirectSolutionForRow(rowHints, solution, rowIndex) {
         const rowFilledUnknownWithX = solution[rowIndex].map((cell) => cell === 'O' ? 'O' : 'X');
         solution[rowIndex] = rowFilledUnknownWithX;
       }
+
+      // handle case where hint is a number equal to the remaining unknowns in row and unknowns are consecutive, e.g. hint is [3] and row is [X, undefined, undefined, undefined, X]
+      const notXCellIndices = solution[rowIndex].map((value, index) => ({ value, index })).filter((c) => c.value !== 'X').map((c) => c.index);
+      if (notXCellIndices.length === rowHints[0] && isArrayConsecutive(notXCellIndices)) {
+        for (let i = 0; i < notXCellIndices.length; i++) {
+          solution[rowIndex][notXCellIndices[i]] = 'O';
+        }
+      }
     }
-  } else {
-    const rowHintsSum = rowHints.reduce((accumulator, currentValue, currentIndex) => {
-      return accumulator + currentValue + (currentIndex === rowHints.length - 1 ? 0 : 1);
-    }, 0);
-    if (rowHintsSum === solution.length) {
-      let fillIndex = 0;
-      for (let rowHintsIndex = 0; rowHintsIndex < rowHints.length; rowHintsIndex++) {
-        for (let hintCell = 0; hintCell < rowHints[rowHintsIndex]; hintCell++) {
-          solution[rowIndex][fillIndex] = 'O';
-          fillIndex++;
-        }
-        if (fillIndex !== solution.length) {
-          solution[rowIndex][fillIndex] = 'X';
-        }
+  }
+  // handle cases [3, 1] => [O, O, O, X, O]. should also handle cases where hints has length 1 and equal to the column length, i.e. [5] => [O, O, O, O, O]
+  const rowHintsSum = rowHints.reduce((accumulator, currentValue, currentIndex) => {
+    return accumulator + currentValue + (currentIndex === rowHints.length - 1 ? 0 : 1);
+  }, 0);
+  if (rowHintsSum === solution[rowIndex].length) {
+    let fillIndex = 0;
+    for (let rowHintsIndex = 0; rowHintsIndex < rowHints.length; rowHintsIndex++) {
+      for (let hintCell = 0; hintCell < rowHints[rowHintsIndex]; hintCell++) {
+        solution[rowIndex][fillIndex] = 'O';
         fillIndex++;
       }
+      if (fillIndex !== solution.length) {
+        solution[rowIndex][fillIndex] = 'X';
+      }
+      fillIndex++;
     }
   }
 }
@@ -56,12 +64,27 @@ function tryFindSequentialSolutionForRow(rowHints, solution, rowIndex) {
     }
     return accumulator;
   }, []);
+  if (rowHints.length === 0) {
+    // if the indices are consecutive, then we know we have a unique solution
+    if (rowHints[0] === knownXAndUnknownIndicesForRow.length && isArrayConsecutive(knownXAndUnknownIndicesForRow)) {
+      // so we can replace all cells with those indices with O
+      for (let i = 0; i < knownXAndUnknownIndicesForRow.length; i++) {
+        solution[rowIndex][knownXAndUnknownIndicesForRow[i]] = 'O';
+      }
+    }
+  }
+  // if we know there is an O one side, we can fill in some more known Os from the first hint
+  if (solution[rowIndex][0] === 'O') {
+    for (let cellIndex = 0; cellIndex < rowHints[0]; cellIndex++) {
+      solution[rowIndex][cellIndex] = 'O';
+    }
+  }
 
-  // if the indices are consecutive, then we know we have a unique solution
-  if (rowHints[0] === knownXAndUnknownIndicesForRow.length && isArrayConsecutive(knownXAndUnknownIndicesForRow)) {
-    // so we can replace all cells with those indices with O
-    for (let i = 0; i < knownXAndUnknownIndicesForRow.length; i++) {
-      solution[rowIndex][knownXAndUnknownIndicesForRow[i]] = 'O';
+  const lastCellIndex = solution[rowIndex].length - 1;
+  if (solution[rowIndex][lastCellIndex] === 'O') {
+    const cellsToFill = rowHints[rowHints.length - 1];
+    for (let cellIndex = lastCellIndex; cellIndex > lastCellIndex - cellsToFill; cellIndex--) {
+      solution[rowIndex][cellIndex] = 'O';
     }
   }
 }
@@ -79,20 +102,26 @@ function tryFindDirectSolutionForColumn(columnHints, solution, columnIndex) {
         const columnFilledUnknownWithX = columnAsArray.map((cell) => cell === 'O' ? 'O' : 'X');
         columnAsArray = columnFilledUnknownWithX;
       }
-    }
-  } else {
-    const columnHintsSum = columnHints.reduce((accumulator, currentValue, currentIndex) => {
-      return accumulator + currentValue + (currentIndex === columnHints.length - 1 ? 0 : 1);
-    }, 0);
-    if (columnHintsSum === solution.length) {
-      let fillIndex = 0;
-      for (let columnHintsIndex = 0; columnHintsIndex < columnHints.length; columnHintsIndex++) {
-        for (let hintCell = 0; hintCell < columnHints[columnHintsIndex]; hintCell++) {
-          columnAsArray[fillIndex] = 'O';
-          fillIndex++;
+      // handle case where hint is a number equal to the remaining unknowns in row and unknowns are consecutive, e.g. hint is [3] and row is [X, undefined, undefined, undefined, X]
+      const notXCellIndices = columnAsArray.map((value, index) => ({ value, index })).filter((c) => c.value !== 'X').map((c) => c.index);
+      if (notXCellIndices.length === columnHints[0] && isArrayConsecutive(notXCellIndices)) {
+        for (let i = 0; i < notXCellIndices.length; i++) {
+          columnAsArray[notXCellIndices[i]] = 'O';
         }
+      }
+    }
+  }
+  const columnHintsSum = columnHints.reduce((accumulator, currentValue, currentIndex) => {
+    return accumulator + currentValue + (currentIndex === columnHints.length - 1 ? 0 : 1);
+  }, 0);
+  if (columnHintsSum === solution.length) {
+    let fillIndex = 0;
+    for (let columnHintsIndex = 0; columnHintsIndex < columnHints.length; columnHintsIndex++) {
+      for (let hintCell = 0; hintCell < columnHints[columnHintsIndex]; hintCell++) {
+        columnAsArray[fillIndex] = 'O';
         fillIndex++;
       }
+      fillIndex++;
     }
   }
   columnToSolution(columnAsArray, columnIndex, solution);
@@ -100,6 +129,7 @@ function tryFindDirectSolutionForColumn(columnHints, solution, columnIndex) {
 
 function tryFindSequentialSolutionForColumn(columnHints, solution, columnIndex) {
   const columnAsArray = solution.map((row) => row[columnIndex]);
+
   // try solve simple case: eg rowHint [3] and solution row [X, undefined, O, undefined, X] then we can fill in like so [X, O, O, O, X]
   // first find the indices
   const knownXAndUnknownIndicesForColumn = columnAsArray.reduce((accumulator, currentValue, currentIndex) => {
@@ -108,11 +138,27 @@ function tryFindSequentialSolutionForColumn(columnHints, solution, columnIndex) 
     }
     return accumulator;
   }, []);
-  // if the indices are consecutive, then we know we have a unique solution
-  if (columnHints[0] === knownXAndUnknownIndicesForColumn.length && isArrayConsecutive(knownXAndUnknownIndicesForColumn)) {
-    // so we can replace all cells with those indices with O
-    for (let i = 0; i < knownXAndUnknownIndicesForColumn.length; i++) {
-      columnAsArray[knownXAndUnknownIndicesForColumn[i]] = 'O';
+  if (columnHints.length === 0) {
+    // if the indices are consecutive, then we know we have a unique solution
+    if (columnHints[0] === knownXAndUnknownIndicesForColumn.length && isArrayConsecutive(knownXAndUnknownIndicesForColumn)) {
+      // so we can replace all cells with those indices with O
+      for (let i = 0; i < knownXAndUnknownIndicesForColumn.length; i++) {
+        columnAsArray[knownXAndUnknownIndicesForColumn[i]] = 'O';
+      }
+    }
+  }
+  // if we know there is an O one side, we can fill in some more known Os from the first hint
+  if (columnAsArray[0] === 'O') {
+    for (let cellIndex = 0; cellIndex < columnHints[0]; cellIndex++) {
+      columnAsArray[cellIndex] = 'O';
+    }
+  }
+
+  const lastCellIndex = columnAsArray.length - 1;
+  if (columnAsArray[lastCellIndex] === 'O') {
+    const cellsToFill = columnHints[columnHints.length - 1];
+    for (let cellIndex = lastCellIndex; cellIndex > lastCellIndex - cellsToFill; cellIndex--) {
+      columnAsArray[cellIndex] = 'O';
     }
   }
   columnToSolution(columnAsArray, columnIndex, solution);
@@ -281,7 +327,7 @@ function getLongestNonXSequence(row) {
   let currentSequenceStartIndex = 0;
   let currentSequenceLength = 0;
 
-  for (let cellIndex = 0;  cellIndex < row.length; cellIndex++) {
+  for (let cellIndex = 0; cellIndex < row.length; cellIndex++) {
     if (cellIndex > 0 && row[cellIndex - 1] === 'X') {
       currentSequenceLength = 0;
       currentSequenceStartIndex = cellIndex;
@@ -306,18 +352,18 @@ function tryFindPartialSolutionForRow(rowHints, solution, rowIndex) {
   if (rowHints.length === 1) {
     const longestNonXSequence = getLongestNonXSequence(solution[rowIndex]);
     if (rowHints[0] > (longestNonXSequence.length / 2)) {
-      const fillFromIndex = longestNonXSequence.index + parseInt(longestNonXSequence.length/2);
+      const fillFromIndex = longestNonXSequence.index + parseInt(longestNonXSequence.length / 2);
       solution[rowIndex][fillFromIndex] = 'O';
 
-      const numberOfCellsToFillInEachDirection = parseInt((rowHints[0] - 2)/2);
+      const numberOfCellsToFillInEachDirection = parseInt((rowHints[0] - 2) / 2);
 
       let cellsFilledTotal = 0;
 
-      for (let cellIndex = fillFromIndex + 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex < solution[rowIndex].length; cellIndex++, cellsFilled++) {
+      for (let cellIndex = fillFromIndex + 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex < solution[rowIndex].length; cellIndex++ , cellsFilled++) {
         solution[rowIndex][cellIndex] = 'O';
         cellsFilledTotal++;
       }
-      for (let cellIndex = fillFromIndex - 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex >= 0; cellIndex--, cellsFilled++) {
+      for (let cellIndex = fillFromIndex - 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex >= 0; cellIndex-- , cellsFilled++) {
         solution[rowIndex][cellIndex] = 'O';
         cellsFilledTotal++;
       }
@@ -330,18 +376,18 @@ function tryFindPartialSolutionForColumn(columnHints, solution, columnIndex) {
   if (columnHints.length === 1) {
     const longestNonXSequence = getLongestNonXSequence(columnAsArray);
     if (columnHints[0] > (longestNonXSequence.length / 2)) {
-      const fillFromIndex = longestNonXSequence.index + parseInt(longestNonXSequence.length/2);
+      const fillFromIndex = longestNonXSequence.index + parseInt(longestNonXSequence.length / 2);
       columnAsArray[fillFromIndex] = 'O';
 
-      const numberOfCellsToFillInEachDirection = parseInt((columnHints[0] - 2)/2);
+      const numberOfCellsToFillInEachDirection = parseInt((columnHints[0] - 2) / 2);
 
       let cellsFilledTotal = 0;
 
-      for (let cellIndex = fillFromIndex + 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex < solution[columnIndex].length; cellIndex++, cellsFilled++) {
+      for (let cellIndex = fillFromIndex + 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex < solution[columnIndex].length; cellIndex++ , cellsFilled++) {
         columnAsArray[cellIndex] = 'O';
         cellsFilledTotal++;
       }
-      for (let cellIndex = fillFromIndex - 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex >= 0; cellIndex--, cellsFilled++) {
+      for (let cellIndex = fillFromIndex - 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex >= 0; cellIndex-- , cellsFilled++) {
         columnAsArray[cellIndex] = 'O';
         cellsFilledTotal++;
       }
@@ -378,15 +424,20 @@ export default function solve(level) {
   for (let round = 0; round < 2; round++) {
     rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
+    console.log('*** A', solution);
 
     rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
     columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
+    console.log('*** B', solution);
 
     rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
+    console.log('*** C', solution);
 
     rowHints.forEach((row, index) => tryFindPartialSolutionForRow(row, solution, index));
+    console.log('*** D rows', solution);
     columnHints.forEach((column, index) => tryFindPartialSolutionForColumn(column, solution, index));
+    console.log('*** D cols', solution);
 
     if (isValidSolution(level, solution)) {
       return fillInMissingCells(solution, 'X');
