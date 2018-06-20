@@ -10,6 +10,7 @@ const isValidSolution = app.__get__('isValidSolution');
 const fillInMissingCells = app.__get__('fillInMissingCells');
 const fillImpossibleMovesForRow = app.__get__('fillImpossibleMovesForRow');
 const fillImpossibleMovesForColumn = app.__get__('fillImpossibleMovesForColumn');
+const tryFindPartialSolutionForRow = app.__get__('tryFindPartialSolutionForRow');
 
 describe('fillInMissingCellsWithX', () => {
   it('test case 1', () => {
@@ -169,9 +170,9 @@ describe('Fill in impossible moves for column', () => {
       ['O'],
       [undefined]
     ];
-    const columnValues = [3];
+    const columnHints = [3];
     const columnIndex = 0;
-    fillImpossibleMovesForColumn(columnValues, solution, columnIndex);
+    fillImpossibleMovesForColumn(columnHints, solution, columnIndex);
     should.deepEqual(solution, expectedResult);
   });
 
@@ -190,9 +191,9 @@ describe('Fill in impossible moves for column', () => {
       [undefined],
       ['O']
     ];
-    const columnValues = [3];
+    const columnHints = [3];
     const columnIndex = 0;
-    fillImpossibleMovesForColumn(columnValues, solution, columnIndex);
+    fillImpossibleMovesForColumn(columnHints, solution, columnIndex);
     should.deepEqual(solution, expectedResult);
   });
 
@@ -211,12 +212,51 @@ describe('Fill in impossible moves for column', () => {
       ['X'],
       ['X']
     ];
-    const columnValues = [3];
+    const columnHints = [3];
     const columnIndex = 0;
-    fillImpossibleMovesForColumn(columnValues, solution, columnIndex);
+    fillImpossibleMovesForColumn(columnHints, solution, columnIndex);
     should.deepEqual(solution, expectedResult);
   });
-})
+});
+
+describe('Try find partial solutions for row', () => {
+  it('Test case 1', () => {
+    const solution = [
+      [undefined, undefined, undefined, undefined, undefined]
+    ];
+    const expectedResult = [
+      [undefined, undefined, 'O', undefined, undefined]
+    ];
+    const rowHints = [3];
+    const rowIndex = 0;
+    tryFindPartialSolutionForRow(rowHints, solution, rowIndex);
+    should.deepEqual(solution, expectedResult);
+  });
+  it('Test case 2', () => {
+    const solution = [
+      [undefined, undefined, undefined, undefined, undefined]
+    ];
+    const expectedResult = [
+      [undefined, 'O', 'O', 'O', undefined]
+    ];
+    const rowHints = [4];
+    const rowIndex = 0;
+    tryFindPartialSolutionForRow(rowHints, solution, rowIndex);
+    should.deepEqual(solution, expectedResult);
+  });
+  it.skip('Test case 3', () => {
+    const solution = [
+      [undefined, undefined, undefined, undefined, undefined]
+    ];
+    const expectedResult = [
+      ['O', 'O', 'O', 'O', 'O']
+    ];
+    const rowHints = [5];
+    const rowIndex = 0;
+    tryFindPartialSolutionForRow(rowHints, solution, rowIndex);
+    should.deepEqual(solution, expectedResult);
+  });
+});
 
 describe('Solver', () => {
   it('Should solve First steps 1', () => {
@@ -348,6 +388,18 @@ describe('Solver', () => {
       ['X', 'O', 'O', 'X', 'O']
     ];
     const actualSolution = solve(LEVELS.FIRST_STEPS[10]);
+    should.deepEqual(expectedSolution, actualSolution);
+  });
+
+  it('Should solve First steps 12', () => {
+    const expectedSolution = [
+      ['X', 'X', 'X', 'O', 'O'],
+      ['O', 'O', 'X', 'O', 'O'],
+      ['O', 'O', 'O', 'O', 'X'],
+      ['O', 'O', 'O', 'X', 'X'],
+      ['O', 'X', 'O', 'X', 'X']
+    ];
+    const actualSolution = solve(LEVELS.FIRST_STEPS[11]);
     should.deepEqual(expectedSolution, actualSolution);
   });
 })

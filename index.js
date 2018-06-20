@@ -188,12 +188,11 @@ function fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPos
   }
 }
 
-function fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex) {
-  const columnAsArray = solution.map((row) => row[columnIndex]);
+function fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray) {
   let cellIndex = foundFirstOCellIndex + 1;
 
   for (let cellsFilledWithPossibleO = 0;
-    numberOfPossibleOToFillInOneDirection > 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < solution.length;
+    numberOfPossibleOToFillInOneDirection > 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < columnAsArray.length;
     cellIndex++ , cellsFilledWithPossibleO++) {
     if (!columnAsArray[cellIndex]) {
       columnAsArray[cellIndex] = 'Possible O';
@@ -207,13 +206,10 @@ function fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOf
     }
     cellIndex++;
   }
-
-  columnToSolution(columnAsArray, columnIndex, solution);
 }
 
 
-function fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex) {
-  const columnAsArray = solution.map((row) => row[columnIndex]);
+function fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray) {
   let cellIndex = foundFirstOCellIndex - 1;
 
   // try to fill to left with possible Os
@@ -232,7 +228,6 @@ function fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numbe
     }
     cellIndex--;
   }
-  columnToSolution(columnAsArray, columnIndex, solution);
 }
 
 function fillImpossibleMovesForRow(rowHints, solution, rowIndex) {
@@ -257,28 +252,102 @@ function fillImpossibleMovesForRow(rowHints, solution, rowIndex) {
 }
 
 function fillImpossibleMovesForColumn(columnHints, solution, columnIndex) {
+  let columnAsArray = solution.map((row) => row[columnIndex]);
   if (columnHints.length === 1) {
     if (columnHints[0] === 0) {
-      solution.forEach((row, rowIndex) => {
-        solution[rowIndex][columnHints[0]] = 'X';
-      });
+      columnAsArray = columnAsArray.fill('X');
     } else {
-      const columnAsArray = solution.map((row) => row[columnIndex]);
       const foundFirstOCellIndex = columnAsArray.findIndex((cell) => cell === 'O');
 
       if (foundFirstOCellIndex !== -1) {
         const numberOfPossibleOToFillInOneDirection = columnHints[0] - 1;
-        fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex);
-        fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, columnIndex);
+        fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray, columnIndex);
+        fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray, columnIndex);
 
-        solution.forEach((row, rowIndex) => {
-          if (row[columnIndex] === 'Possible O') {
-            solution[rowIndex][columnIndex] = undefined;
+        columnAsArray.forEach((cell, cellIndex) => {
+          if (cell === 'Possible O') {
+            columnAsArray[cellIndex] = undefined;
           }
         });
       }
     }
   }
+  columnToSolution(columnAsArray, columnIndex, solution);
+}
+
+function getLongestNonXSequence(row) {
+  let longestSequenceStartIndex = 0;
+  let longestSequenceLength = 0;
+  let currentSequenceStartIndex = 0;
+  let currentSequenceLength = 0;
+
+  for (let cellIndex = 0;  cellIndex < row.length; cellIndex++) {
+    if (cellIndex > 0 && row[cellIndex - 1] === 'X') {
+      currentSequenceLength = 0;
+      currentSequenceStartIndex = cellIndex;
+    }
+
+    if (row[cellIndex] !== 'X') {
+      currentSequenceLength++;
+
+      if (currentSequenceLength > longestSequenceLength) {
+        longestSequenceLength = currentSequenceLength;
+        longestSequenceStartIndex = currentSequenceStartIndex;
+      }
+    }
+  }
+  return {
+    index: longestSequenceStartIndex,
+    length: longestSequenceLength
+  }
+}
+
+function tryFindPartialSolutionForRow(rowHints, solution, rowIndex) {
+  if (rowHints.length === 1) {
+    const longestNonXSequence = getLongestNonXSequence(solution[rowIndex]);
+    if (rowHints[0] > (longestNonXSequence.length / 2)) {
+      const fillFromIndex = longestNonXSequence.index + parseInt(longestNonXSequence.length/2);
+      solution[rowIndex][fillFromIndex] = 'O';
+
+      const numberOfCellsToFillInEachDirection = parseInt((rowHints[0] - 2)/2);
+
+      let cellsFilledTotal = 0;
+
+      for (let cellIndex = fillFromIndex + 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex < solution[rowIndex].length; cellIndex++, cellsFilled++) {
+        solution[rowIndex][cellIndex] = 'O';
+        cellsFilledTotal++;
+      }
+      for (let cellIndex = fillFromIndex - 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex >= 0; cellIndex--, cellsFilled++) {
+        solution[rowIndex][cellIndex] = 'O';
+        cellsFilledTotal++;
+      }
+    }
+  }
+}
+
+function tryFindPartialSolutionForColumn(columnHints, solution, columnIndex) {
+  const columnAsArray = solution.map((row) => row[columnIndex]);
+  if (columnHints.length === 1) {
+    const longestNonXSequence = getLongestNonXSequence(columnAsArray);
+    if (columnHints[0] > (longestNonXSequence.length / 2)) {
+      const fillFromIndex = longestNonXSequence.index + parseInt(longestNonXSequence.length/2);
+      columnAsArray[fillFromIndex] = 'O';
+
+      const numberOfCellsToFillInEachDirection = parseInt((columnHints[0] - 2)/2);
+
+      let cellsFilledTotal = 0;
+
+      for (let cellIndex = fillFromIndex + 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex < solution[columnIndex].length; cellIndex++, cellsFilled++) {
+        columnAsArray[cellIndex] = 'O';
+        cellsFilledTotal++;
+      }
+      for (let cellIndex = fillFromIndex - 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex >= 0; cellIndex--, cellsFilled++) {
+        columnAsArray[cellIndex] = 'O';
+        cellsFilledTotal++;
+      }
+    }
+  }
+  columnToSolution(columnAsArray, columnIndex, solution);
 }
 
 
@@ -306,30 +375,18 @@ export default function solve(level) {
   let solution = [...Array(columnHints.length)];
   solution = solution.map(row => [...Array(columnHints.length)]);
 
-  rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
-  columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
-
-  if (isValidSolution(level, solution)) {
-    return fillInMissingCells(solution, 'X');
-  }
-
-
-  rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
-  columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
-
-  rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
-  columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
-
-  if (isValidSolution(level, solution)) {
-    return fillInMissingCells(solution, 'X');
-  }
-
   for (let round = 0; round < 2; round++) {
     rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
 
+    rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
+    columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
+
     rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
+
+    rowHints.forEach((row, index) => tryFindPartialSolutionForRow(row, solution, index));
+    columnHints.forEach((column, index) => tryFindPartialSolutionForColumn(column, solution, index));
 
     if (isValidSolution(level, solution)) {
       return fillInMissingCells(solution, 'X');
