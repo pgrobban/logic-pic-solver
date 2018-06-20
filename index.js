@@ -75,16 +75,24 @@ function tryFindSequentialSolutionForRow(rowHints, solution, rowIndex) {
   }
   // if we know there is an O one side, we can fill in some more known Os from the first hint
   if (solution[rowIndex][0] === 'O') {
-    for (let cellIndex = 0; cellIndex < rowHints[0]; cellIndex++) {
+    let cellIndex = 0;
+    for (; cellIndex < rowHints[0]; cellIndex++) {
       solution[rowIndex][cellIndex] = 'O';
+    }
+    if (cellIndex !== solution[rowIndex].length) {
+      solution[rowIndex][cellIndex] = 'X';
     }
   }
 
   const lastCellIndex = solution[rowIndex].length - 1;
   if (solution[rowIndex][lastCellIndex] === 'O') {
     const cellsToFill = rowHints[rowHints.length - 1];
-    for (let cellIndex = lastCellIndex; cellIndex > lastCellIndex - cellsToFill; cellIndex--) {
+    let cellIndex = lastCellIndex;
+    for (; cellIndex > lastCellIndex - cellsToFill; cellIndex--) {
       solution[rowIndex][cellIndex] = 'O';
+    }
+    if (cellIndex >= 0) {
+      solution[rowIndex][cellIndex] = 'X';
     }
   }
 }
@@ -149,16 +157,24 @@ function tryFindSequentialSolutionForColumn(columnHints, solution, columnIndex) 
   }
   // if we know there is an O one side, we can fill in some more known Os from the first hint
   if (columnAsArray[0] === 'O') {
-    for (let cellIndex = 0; cellIndex < columnHints[0]; cellIndex++) {
+    let cellIndex = 0;
+    for (; cellIndex < columnHints[0]; cellIndex++) {
       columnAsArray[cellIndex] = 'O';
+    }
+    if (cellIndex !== columnAsArray.length) {
+      columnAsArray[cellIndex] = 'X';
     }
   }
 
   const lastCellIndex = columnAsArray.length - 1;
   if (columnAsArray[lastCellIndex] === 'O') {
     const cellsToFill = columnHints[columnHints.length - 1];
-    for (let cellIndex = lastCellIndex; cellIndex > lastCellIndex - cellsToFill; cellIndex--) {
+    let cellIndex = lastCellIndex;
+    for (; cellIndex > lastCellIndex - cellsToFill; cellIndex--) {
       columnAsArray[cellIndex] = 'O';
+    }
+    if (cellIndex >= 0) {
+      columnAsArray[cellIndex] = 'X';
     }
   }
   columnToSolution(columnAsArray, columnIndex, solution);
@@ -424,20 +440,20 @@ export default function solve(level) {
   for (let round = 0; round < 2; round++) {
     rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
-    console.log('*** A', solution);
+//    console.log('*** A', solution);
 
     rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
     columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
-    console.log('*** B', solution);
+    console.log('*** BEFORE SEQ', solution);
 
     rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
+    console.log('*** AFTER SEQ rows', solution);
     columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
-    console.log('*** C', solution);
+    console.log('*** AFTER SEQ cols', solution);
 
     rowHints.forEach((row, index) => tryFindPartialSolutionForRow(row, solution, index));
-    console.log('*** D rows', solution);
     columnHints.forEach((column, index) => tryFindPartialSolutionForColumn(column, solution, index));
-    console.log('*** D cols', solution);
+    console.log('*** After Partial\n', solution);
 
     if (isValidSolution(level, solution)) {
       return fillInMissingCells(solution, 'X');

@@ -61,7 +61,7 @@ describe('Try find sequential solution for row', () => {
       ['O', undefined, undefined, undefined, undefined]
     ];
     const expectedResult = [
-      ['O', 'O', undefined, undefined, undefined]
+      ['O', 'O', 'X', undefined, undefined]
     ];
     const rowHint = [2, 1];
     const rowIndex = 0;
@@ -74,7 +74,7 @@ describe('Try find sequential solution for row', () => {
       [undefined, undefined, undefined, undefined, 'O']
     ];
     const expectedResult = [
-      [undefined, undefined, undefined, 'O', 'O']
+      [undefined, undefined, 'X', 'O', 'O']
     ];
     const rowHint = [1, 2];
     const rowIndex = 0;
@@ -90,12 +90,12 @@ describe('Try find sequential solution for column', () => {
       [undefined],
       [undefined],
       [undefined],
-      [undefined],
+      [undefined]
     ];
     const expectedResult = [
       ['O'],
       ['O'],
-      [undefined],
+      ['X'],
       [undefined],
       [undefined],
     ];
@@ -116,7 +116,7 @@ describe('Try find sequential solution for column', () => {
     const expectedResult = [
       [undefined],
       [undefined],
-      [undefined],
+      ['X'],
       ['O'],
       ['O']
     ];
