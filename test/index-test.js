@@ -266,7 +266,28 @@ describe('Fill in impossible moves for row', () => {
     const rowIndex = 0;
     fillImpossibleMovesForRow(rowHints, solution, rowIndex);
     should.deepEqual(solution, expectedResult);
-  })
+  });
+
+  it('Test case 5', () => {
+    const solution = [
+      ['O', 'O', 'X', 'O', undefined],
+      [],
+      [],
+      [],
+      []
+    ];
+    const expectedResult = [
+      ['O', 'O', 'X', 'O', 'X'],
+      [],
+      [],
+      [],
+      []
+    ];
+    const rowHints = [2, 1];
+    const rowIndex = 0;
+    fillImpossibleMovesForRow(rowHints, solution, rowIndex);
+    should.deepEqual(solution, expectedResult);
+  });
 });
 
 describe('Fill in impossible moves for column', () => {

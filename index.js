@@ -293,45 +293,55 @@ function fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numbe
 }
 
 function fillImpossibleMovesForRow(rowHints, solution, rowIndex) {
-  if (rowHints.length === 1) {
-    if (rowHints[0] === 0) {
-      solution[rowIndex] = solution[rowIndex].fill('X');
-    } else {
-      const foundFirstOCellIndex = solution[rowIndex].findIndex((cell) => cell === 'O');
-      if (foundFirstOCellIndex !== -1) {
-        const numberOfPossibleOToFillInOneDirection = rowHints[0] - 1;
-        fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex);
-        fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex);
-
-        solution[rowIndex].forEach((cell, cellIndex) => {
-          if (cell === 'Possible O') {
-            solution[rowIndex][cellIndex] = undefined;
-          }
-        });
+  const numberOfKnownOsInRow = solution[rowIndex].filter((cell) => cell === 'O').length;
+  if (numberOfKnownOsInRow === sum(rowHints)) {
+    solution[rowIndex].forEach((cell, cellIndex) => {
+      if (!cell) {
+        solution[rowIndex][cellIndex] = 'X';
       }
+    });
+  }
+
+  if (rowHints.length === 1) {
+    const foundFirstOCellIndex = solution[rowIndex].findIndex((cell) => cell === 'O');
+    if (foundFirstOCellIndex !== -1) {
+      const numberOfPossibleOToFillInOneDirection = rowHints[0] - 1;
+      fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex);
+      fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex);
+
+      solution[rowIndex].forEach((cell, cellIndex) => {
+        if (cell === 'Possible O') {
+          solution[rowIndex][cellIndex] = undefined;
+        }
+      });
     }
   }
 }
 
 function fillImpossibleMovesForColumn(columnHints, solution, columnIndex) {
   let columnAsArray = solution.map((row) => row[columnIndex]);
-  if (columnHints.length === 1) {
-    if (columnHints[0] === 0) {
-      columnAsArray = columnAsArray.fill('X');
-    } else {
-      const foundFirstOCellIndex = columnAsArray.findIndex((cell) => cell === 'O');
-
-      if (foundFirstOCellIndex !== -1) {
-        const numberOfPossibleOToFillInOneDirection = columnHints[0] - 1;
-        fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray, columnIndex);
-        fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray, columnIndex);
-
-        columnAsArray.forEach((cell, cellIndex) => {
-          if (cell === 'Possible O') {
-            columnAsArray[cellIndex] = undefined;
-          }
-        });
+  const numberOfKnownOsInRow = columnAsArray.filter((cell) => cell === 'O').length;
+  if (numberOfKnownOsInRow === sum(columnHints)) {
+    columnAsArray.forEach((cell, cellIndex) => {
+      if (!cell) {
+        columnAsArray[cellIndex] = 'X';
       }
+    });
+  }
+
+  if (columnHints.length === 1) {
+    const foundFirstOCellIndex = columnAsArray.findIndex((cell) => cell === 'O');
+
+    if (foundFirstOCellIndex !== -1) {
+      const numberOfPossibleOToFillInOneDirection = columnHints[0] - 1;
+      fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray, columnIndex);
+      fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray, columnIndex);
+
+      columnAsArray.forEach((cell, cellIndex) => {
+        if (cell === 'Possible O') {
+          columnAsArray[cellIndex] = undefined;
+        }
+      });
     }
   }
   columnToSolution(columnAsArray, columnIndex, solution);
@@ -437,10 +447,10 @@ export default function solve(level) {
   let solution = [...Array(columnHints.length)];
   solution = solution.map(row => [...Array(columnHints.length)]);
 
-  for (let round = 0; round < 2; round++) {
+  for (let round = 0; round < 3; round++) {
     rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
-//    console.log('*** A', solution);
+    console.log('*** AFTER DIRECT', solution);
 
     rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
     columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
