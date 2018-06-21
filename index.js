@@ -85,7 +85,6 @@ function tryFindDirectIntervalSolution(rowHints, solution, rowIndex) {
       }
     });
   }
-
 }
 
 function tryFindSequentialSolutionForRow(rowHints, solution, rowIndex) {
@@ -166,7 +165,41 @@ function tryFindDirectSolutionForColumn(columnHints, solution, columnIndex) {
       fillIndex++;
     }
   }
+  tryFindDirectIntervalSolutionColumn(columnHints, solution, columnIndex);
   columnToSolution(columnAsArray, columnIndex, solution);
+}
+
+function tryFindDirectIntervalSolutionColumn(columnHints, solution, columnIndex) {
+  // find solutions in intervals
+  const columnLength = solution.length;
+  const xIntervalStartIndices = [];
+  const columnAsArray = solution.map((row) => row[columnIndex]);
+
+  columnAsArray.forEach((cell, cellIndex) => {
+    if (cell === 'X') {
+      xIntervalStartIndices.push(cellIndex + 1);
+    }
+  });
+  xIntervalStartIndices.push(columnLength + 1); // pretend we have qan X at the end of the row
+
+  const lengthsOfIntervalsBetweenXs = xIntervalStartIndices.map((startOfIntervalIndex, index) => {
+    if (index === 0) {
+      return xIntervalStartIndices[0];
+    }
+    return startOfIntervalIndex - 1 - xIntervalStartIndices[index - 1];
+  }).filter(interval => interval !== 1);
+
+  if (isEqual(columnHints, lengthsOfIntervalsBetweenXs)) {
+    xIntervalStartIndices.forEach((startOfInterval, index) => {
+      if (startOfInterval === columnLength) {
+        return;
+      }
+
+      for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < columnHints[index]; cellToFillIndexOffsetFromStartOfInterval++) {
+        columnAsArray[startOfInterval + cellToFillIndexOffsetFromStartOfInterval] = 'O';
+      }
+    });
+  }
 }
 
 function tryFindSequentialSolutionForColumn(columnHints, solution, columnIndex) {
