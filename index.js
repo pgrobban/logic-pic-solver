@@ -1,4 +1,5 @@
 import { countBy, sum, sumBy, filter, cloneDeep, isEqual } from 'lodash';
+const DEBUG = true;
 
 function isArrayConsecutive(arr) {
   for (let i = 0; i < arr.length - 1; i++) {
@@ -75,13 +76,13 @@ function tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex) {
   }).filter(interval => interval !== 0);
 
   lengthsOfIntervalsBetweenXs.splice(0, 1);
-  rowHints.forEach((rowHint, rowHintIndex) => {
-    if (isEqual(rowHint, lengthsOfIntervalsBetweenXs[rowHintIndex])) {
+  if (isEqual(rowHints, lengthsOfIntervalsBetweenXs)) {
+    rowHints.forEach((rowHint, rowHintIndex) => {
       for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHint; cellToFillIndexOffsetFromStartOfInterval++) {
         solution[rowIndex][xIntervalStartIndices[rowHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1] = 'O';
       }
-    }
-  });
+    });
+  }
 }
 
 function tryFindSequentialSolutionForRow(rowHints, solution, rowIndex) {
@@ -515,15 +516,27 @@ export default function solve(level) {
     const solutionAtStartOfPass = cloneDeep(solution);
     rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
+    if (DEBUG) {
+      console.log("After direct solutions\n", solution);
+    }
 
     rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
     columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
+    if (DEBUG) {
+      console.log("After filled in impossible moves\n", solution);
+    }
 
     rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
+    if (DEBUG) {
+      console.log("After sequential solutions\n", solution);
+    }
 
     rowHints.forEach((row, index) => tryFindPartialSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindPartialSolutionForColumn(column, solution, index));
+    if (DEBUG) {
+      console.log("After partial solutions\n", solution);
+    }
 
     // if no changes have been made, we break and return partial solution
     if (isEqual(solution, solutionAtStartOfPass)) {
