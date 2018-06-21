@@ -66,8 +66,6 @@ function tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex) {
     }
   });
   xIntervalStartIndices.push(rowLength); // pretend we have qan X at the start and end of the row
-  console.log('***', xIntervalStartIndices);
-
 
   const lengthsOfIntervalsBetweenXs = xIntervalStartIndices.map((startOfIntervalIndex, index) => {
     if (index === 0) {
@@ -75,25 +73,15 @@ function tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex) {
     }
     return startOfIntervalIndex - 1 - xIntervalStartIndices[index - 1];
   }).filter(interval => interval !== 0);
-  console.log('***', lengthsOfIntervalsBetweenXs);
 
-
+  lengthsOfIntervalsBetweenXs.splice(0, 1);
   rowHints.forEach((rowHint, rowHintIndex) => {
     if (isEqual(rowHint, lengthsOfIntervalsBetweenXs[rowHintIndex])) {
-      xIntervalStartIndices.forEach((startOfInterval, index) => {
-        if (startOfInterval === rowLength) {
-          return;
-        }
-
-        for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHint; cellToFillIndexOffsetFromStartOfInterval++) {
-          console.log('*** filling', startOfInterval + cellToFillIndexOffsetFromStartOfInterval);
-
-          solution[rowIndex][startOfInterval + cellToFillIndexOffsetFromStartOfInterval] = 'O';
-        }
-      });
+      for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHint; cellToFillIndexOffsetFromStartOfInterval++) {
+        solution[rowIndex][xIntervalStartIndices[rowHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1] = 'O';
+      }
     }
   });
-
 }
 
 function tryFindSequentialSolutionForRow(rowHints, solution, rowIndex) {
