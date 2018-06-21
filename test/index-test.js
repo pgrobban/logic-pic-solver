@@ -550,4 +550,21 @@ describe('Solver', () => {
     const actualSolution = solve(LEVELS.FIRST_STEPS[12]);
     should.deepEqual(expectedSolution, actualSolution);
   });
+
+  it('Should solve First steps 14', () => {
+    const expectedSolution = [
+      ['O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X'],
+      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
+      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
+      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
+      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X'],
+      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
+      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
+      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
+      ['O', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X', 'X'],
+    ];
+    const actualSolution = solve(LEVELS.FIRST_STEPS[13]);
+    should.deepEqual(expectedSolution, actualSolution);
+  });
 })
