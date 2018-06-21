@@ -53,6 +53,39 @@ function tryFindDirectSolutionForRow(rowHints, solution, rowIndex) {
       fillIndex++;
     }
   }
+  tryFindDirectIntervalSolution(rowHints, solution, rowIndex);
+}
+
+function tryFindDirectIntervalSolution(rowHints, solution, rowIndex) {
+  // find solutions in intervals
+  const rowLength = solution[rowIndex].length;
+  const xIntervalStartIndices = [];
+  solution[rowIndex].forEach((cell, cellIndex) => {
+    if (cell === 'X') {
+      xIntervalStartIndices.push(cellIndex + 1);
+    }
+  });
+  xIntervalStartIndices.push(rowLength + 1); // pretend we have qan X at the end of the row
+
+  const lengthsOfIntervalsBetweenXs = xIntervalStartIndices.map((startOfIntervalIndex, index) => {
+    if (index === 0) {
+      return xIntervalStartIndices[0];
+    }
+    return startOfIntervalIndex - 1 - xIntervalStartIndices[index - 1];
+  }).filter(interval => interval !== 1);
+
+  if (isEqual(rowHints, lengthsOfIntervalsBetweenXs)) {
+    xIntervalStartIndices.forEach((startOfInterval, index) => {
+      if (startOfInterval === rowLength) {
+        return;
+      }
+
+      for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHints[index]; cellToFillIndexOffsetFromStartOfInterval++) {
+        solution[rowIndex][startOfInterval + cellToFillIndexOffsetFromStartOfInterval] = 'O';
+      }
+    });
+  }
+
 }
 
 function tryFindSequentialSolutionForRow(rowHints, solution, rowIndex) {
@@ -122,6 +155,7 @@ function tryFindDirectSolutionForColumn(columnHints, solution, columnIndex) {
   const columnHintsSum = columnHints.reduce((accumulator, currentValue, currentIndex) => {
     return accumulator + currentValue + (currentIndex === columnHints.length - 1 ? 0 : 1);
   }, 0);
+
   if (columnHintsSum === solution.length) {
     let fillIndex = 0;
     for (let columnHintsIndex = 0; columnHintsIndex < columnHints.length; columnHintsIndex++) {
