@@ -56,6 +56,19 @@ describe('try find direct solution for row', () => {
     tryFindDirectSolutionForRow(rowHint, input, rowIndex);
     should.deepEqual(expectedResult, input);
   });
+
+  it.only('Test case 4', () => {
+    const input = [
+      ['O', 'O', 'X', undefined, undefined, 'X', 'O', undefined, 'X', 'O']
+    ];
+    const expectedResult = [
+      ['O', 'O', 'X', 'O', 'O', 'X', 'O', 'X', 'X', 'O']
+    ];
+    const rowHint = [2, 2, 1, 1];
+    const rowIndex = 0;
+    tryFindDirectSolutionForRow(rowHint, input, rowIndex);
+    should.deepEqual(expectedResult, input);
+  });
 });
 
 describe('try find direct solution for column', () => {
@@ -594,7 +607,7 @@ describe('Solver', () => {
     should.deepEqual(expectedSolution, actualSolution);
   });
 
-  it.skip('Should solve First steps 15', () => {
+  it('Should solve First steps 15', () => {
     const expectedSolution = [
       ['O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X'],
       ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],

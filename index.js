@@ -53,38 +53,47 @@ function tryFindDirectSolutionForRow(rowHints, solution, rowIndex) {
       fillIndex++;
     }
   }
-  tryFindDirectIntervalSolution(rowHints, solution, rowIndex);
+  tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex);
 }
 
-function tryFindDirectIntervalSolution(rowHints, solution, rowIndex) {
+function tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex) {
   // find solutions in intervals
   const rowLength = solution[rowIndex].length;
-  const xIntervalStartIndices = [];
+  const xIntervalStartIndices = [-1];
   solution[rowIndex].forEach((cell, cellIndex) => {
     if (cell === 'X') {
-      xIntervalStartIndices.push(cellIndex + 1);
+      xIntervalStartIndices.push(cellIndex);
     }
   });
-  xIntervalStartIndices.push(rowLength + 1); // pretend we have qan X at the end of the row
+  xIntervalStartIndices.push(rowLength); // pretend we have qan X at the start and end of the row
+  console.log('***', xIntervalStartIndices);
+
 
   const lengthsOfIntervalsBetweenXs = xIntervalStartIndices.map((startOfIntervalIndex, index) => {
     if (index === 0) {
-      return xIntervalStartIndices[0];
+      return xIntervalStartIndices[index + 1];
     }
     return startOfIntervalIndex - 1 - xIntervalStartIndices[index - 1];
-  }).filter(interval => interval !== 1);
+  }).filter(interval => interval !== 0);
+  console.log('***', lengthsOfIntervalsBetweenXs);
 
-  if (isEqual(rowHints, lengthsOfIntervalsBetweenXs)) {
-    xIntervalStartIndices.forEach((startOfInterval, index) => {
-      if (startOfInterval === rowLength) {
-        return;
-      }
 
-      for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHints[index]; cellToFillIndexOffsetFromStartOfInterval++) {
-        solution[rowIndex][startOfInterval + cellToFillIndexOffsetFromStartOfInterval] = 'O';
-      }
-    });
-  }
+  rowHints.forEach((rowHint, rowHintIndex) => {
+    if (isEqual(rowHint, lengthsOfIntervalsBetweenXs[rowHintIndex])) {
+      xIntervalStartIndices.forEach((startOfInterval, index) => {
+        if (startOfInterval === rowLength) {
+          return;
+        }
+
+        for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHint; cellToFillIndexOffsetFromStartOfInterval++) {
+          console.log('*** filling', startOfInterval + cellToFillIndexOffsetFromStartOfInterval);
+
+          solution[rowIndex][startOfInterval + cellToFillIndexOffsetFromStartOfInterval] = 'O';
+        }
+      });
+    }
+  });
+
 }
 
 function tryFindSequentialSolutionForRow(rowHints, solution, rowIndex) {
