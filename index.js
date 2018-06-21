@@ -1,4 +1,4 @@
-import { countBy, sum, sumBy, filter } from 'lodash';
+import { countBy, sum, sumBy, filter, cloneDeep, isEqual } from 'lodash';
 
 function isArrayConsecutive(arr) {
   for (let i = 0; i < arr.length - 1; i++) {
@@ -447,23 +447,24 @@ export default function solve(level) {
   let solution = [...Array(columnHints.length)];
   solution = solution.map(row => [...Array(columnHints.length)]);
 
-  for (let round = 0; round < 3; round++) {
+  while (true) {
+    const solutionAtStartOfPass = cloneDeep(solution);
     rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
-    console.log('*** AFTER DIRECT', solution);
 
     rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
     columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
-    console.log('*** BEFORE SEQ', solution);
 
     rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
-    console.log('*** AFTER SEQ rows', solution);
     columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
-    console.log('*** AFTER SEQ cols', solution);
 
     rowHints.forEach((row, index) => tryFindPartialSolutionForRow(row, solution, index));
     columnHints.forEach((column, index) => tryFindPartialSolutionForColumn(column, solution, index));
-    console.log('*** After Partial\n', solution);
+
+    // if no changes have been made, we break and return partial solution
+    if (isEqual(solution, solutionAtStartOfPass)) {
+      break;
+    }
 
     if (isValidSolution(level, solution)) {
       return fillInMissingCells(solution, 'X');

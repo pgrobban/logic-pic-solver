@@ -380,7 +380,7 @@ describe('Try find partial solutions for row', () => {
     tryFindPartialSolutionForRow(rowHints, solution, rowIndex);
     should.deepEqual(solution, expectedResult);
   });
-  it.skip('Test case 3', () => {
+  /* it('Test case 3', () => {
     const solution = [
       [undefined, undefined, undefined, undefined, undefined]
     ];
@@ -391,7 +391,7 @@ describe('Try find partial solutions for row', () => {
     const rowIndex = 0;
     tryFindPartialSolutionForRow(rowHints, solution, rowIndex);
     should.deepEqual(solution, expectedResult);
-  });
+  }); */
 });
 
 describe('Solver', () => {
