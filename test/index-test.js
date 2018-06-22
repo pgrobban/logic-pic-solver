@@ -57,7 +57,7 @@ describe('try find direct solution for row', () => {
     should.deepEqual(expectedResult, input);
   });
 
-  it.skip('Test case 4', () => {
+  it('Test case 4', () => {
     const input = [
       ['O', 'O', 'X', undefined, undefined, 'X', 'O', undefined, 'X', 'O']
     ];
@@ -65,6 +65,19 @@ describe('try find direct solution for row', () => {
       ['O', 'O', 'X', 'O', 'O', 'X', 'O', undefined, 'X', 'O']
     ];
     const rowHint = [2, 2, 1, 1];
+    const rowIndex = 0;
+    tryFindDirectSolutionForRow(rowHint, input, rowIndex);
+    should.deepEqual(expectedResult, input);
+  });
+
+  it('Test case 5', () => {
+    const input = [
+      ['O', 'O', 'X', 'X', undefined, undefined, 'X', 'X', 'O', 'O' ],
+    ];
+    const expectedResult = [
+      ['O', 'O', 'X', 'X', 'O', 'O', 'X', 'X', 'O', 'O' ],
+    ];
+    const rowHint = [2, 2, 2];
     const rowIndex = 0;
     tryFindDirectSolutionForRow(rowHint, input, rowIndex);
     should.deepEqual(expectedResult, input);
@@ -638,7 +651,7 @@ describe('Solver', () => {
     should.deepEqual(expectedSolution, actualSolution);
   });
 
-  it.only('Should solve First steps 15', () => {
+  it('Should solve First steps 15', () => {
     const expectedSolution = [
       ['X', 'X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
       ['X', 'O', 'O', 'O', 'X', 'O', 'O', 'O', 'O', 'O'],
