@@ -96,12 +96,14 @@ function tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex) {
   lengthsOfIntervalsBetweenXs.splice(0, 1);
   console.log("*** lengths", lengthsOfIntervalsBetweenXs);
 
-  if (isEqual(rowHints, lengthsOfIntervalsBetweenXs)) {
+  if (rowHints.length === lengthsOfIntervalsBetweenXs.length) {
     console.log("*** is equal");
     rowHints.forEach((rowHint, rowHintIndex) => {
-      for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHint; cellToFillIndexOffsetFromStartOfInterval++) {
-        console.log("*** filling in", xIntervalStartIndices[rowHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1);
-        solution[rowIndex][xIntervalStartIndices[rowHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1] = 'O';
+      if (isEqual(rowHint, lengthsOfIntervalsBetweenXs[rowHintIndex])) {
+        for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHint; cellToFillIndexOffsetFromStartOfInterval++) {
+          console.log("*** filling in", xIntervalStartIndices[rowHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1);
+          solution[rowIndex][xIntervalStartIndices[rowHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1] = 'O';
+        }
       }
     });
   }
@@ -185,38 +187,52 @@ function tryFindDirectSolutionForColumn(columnHints, solution, columnIndex) {
       fillIndex++;
     }
   }
-  tryFindDirectIntervalSolutionColumn(columnHints, solution, columnIndex);
+  let unknownCells = false;
+  for (let cellIndex = 0; cellIndex < columnAsArray.length; cellIndex++) {
+    if (!columnAsArray[cellIndex]) {
+      unknownCells = true;
+      break;
+    }
+  }
+  if (unknownCells) {
+    tryFindDirectIntervalSolutionColumn(columnHints, columnAsArray, columnIndex);
+  }
   columnToSolution(columnAsArray, columnIndex, solution);
 }
 
-function tryFindDirectIntervalSolutionColumn(columnHints, solution, columnIndex) {
+function tryFindDirectIntervalSolutionColumn(columnHints, columnAsArray) {
   // find solutions in intervals
-  const columnLength = solution.length;
-  const xIntervalStartIndices = [];
-  const columnAsArray = solution.map((row) => row[columnIndex]);
-
+  const columnLength = columnAsArray.length;
+  const xIntervalStartIndices = [-1];
+  if (columnAsArray[0] !== 'X') { // ugly but maybe works?
+    xIntervalStartIndices.push(-1);
+  }
   columnAsArray.forEach((cell, cellIndex) => {
     if (cell === 'X') {
-      xIntervalStartIndices.push(cellIndex + 1);
+      xIntervalStartIndices.push(cellIndex);
     }
   });
-  xIntervalStartIndices.push(columnLength + 1); // pretend we have qan X at the end of the row
+  xIntervalStartIndices.push(columnLength); // pretend we have qan X at the start and end of the row
+  xIntervalStartIndices.splice(0, 1);
+  console.log("*** x intervals", xIntervalStartIndices);
 
   const lengthsOfIntervalsBetweenXs = xIntervalStartIndices.map((startOfIntervalIndex, index) => {
     if (index === 0) {
-      return xIntervalStartIndices[0];
+      return xIntervalStartIndices[index + 1];
     }
     return startOfIntervalIndex - 1 - xIntervalStartIndices[index - 1];
-  }).filter(interval => interval !== 1);
+  }).filter(interval => interval !== 0);
+  lengthsOfIntervalsBetweenXs.splice(0, 1);
+  console.log("*** lengths", lengthsOfIntervalsBetweenXs);
 
-  if (isEqual(columnHints, lengthsOfIntervalsBetweenXs)) {
-    xIntervalStartIndices.forEach((startOfInterval, index) => {
-      if (startOfInterval === columnLength) {
-        return;
-      }
-
-      for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < columnHints[index]; cellToFillIndexOffsetFromStartOfInterval++) {
-        columnAsArray[startOfInterval + cellToFillIndexOffsetFromStartOfInterval] = 'O';
+  if (columnHints.length === lengthsOfIntervalsBetweenXs.length) {
+    console.log("*** is equal");
+    columnHints.forEach((columnHint, columnHintIndex) => {
+      if (isEqual(columnHint, lengthsOfIntervalsBetweenXs[columnHintIndex])) {
+        for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < columnHint; cellToFillIndexOffsetFromStartOfInterval++) {
+          console.log("*** filling in", xIntervalStartIndices[columnHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1);
+          columnAsArray[xIntervalStartIndices[columnHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1] = 'O';
+        }
       }
     });
   }

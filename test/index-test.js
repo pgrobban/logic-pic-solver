@@ -92,6 +92,37 @@ describe('try find direct solution for column', () => {
     tryFindDirectSolutionForColumn(columnHint, input, columnIndex);
     should.deepEqual(expectedResult, input);
   });
+
+  it('Test case 2', () => {
+    const input = [
+      ['O'],
+      ['O'],
+      ['X'],
+      [undefined],
+      [undefined],
+      ['X'],
+      ['O'],
+      [undefined],
+      ['X'],
+      ['O']
+    ];
+    const expectedResult = [
+      ['O'],
+      ['O'],
+      ['X'],
+      ['O'],
+      ['O'],
+      ['X'],
+      ['O'],
+      [undefined],
+      ['X'],
+      ['O']
+    ];
+    const columnHint = [2, 2, 1, 1];
+    const columnIndex = 0;
+    tryFindDirectSolutionForColumn(columnHint, input, columnIndex);
+    should.deepEqual(expectedResult, input);
+  });
 });
 
 describe('Try find sequential solution for row', () => {
@@ -607,18 +638,18 @@ describe('Solver', () => {
     should.deepEqual(expectedSolution, actualSolution);
   });
 
-  it.skip('Should solve First steps 15', () => {
+  it.only('Should solve First steps 15', () => {
     const expectedSolution = [
-      ['O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X', 'X'],
+      ['X', 'X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+      ['X', 'O', 'O', 'O', 'X', 'O', 'O', 'O', 'O', 'O'],
+      ['O', 'O', 'O', 'X', 'X', 'X', 'X', 'O', 'O', 'O'],
+      ['O', 'O', 'X', 'O', 'X', 'X', 'O', 'X', 'O', 'O'],
+      ['O', 'X', 'X', 'O', 'X', 'X', 'O', 'X', 'X', 'O'],
+      ['O', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'O', 'O'],
+      ['O', 'O', 'X', 'O', 'O', 'O', 'O', 'X', 'O', 'O'],
+      ['O', 'O', 'X', 'X', 'O', 'O', 'X', 'X', 'O', 'O'],
+      ['O', 'O', 'O', 'X', 'X', 'X', 'X', 'O', 'O', 'O'],
+      ['O', 'O', 'O', 'O', 'O', 'X', 'O', 'O', 'O', 'O'],
     ];
     const actualSolution = solve(LEVELS.FIRST_STEPS[14]);
     should.deepEqual(expectedSolution, actualSolution);
