@@ -1,5 +1,5 @@
 import { countBy, sum, sumBy, filter, cloneDeep, isEqual } from 'lodash';
-const DEBUG = true;
+const DEBUG = 2;
 
 function isArrayConsecutive(arr) {
   for (let i = 0; i < arr.length - 1; i++) {
@@ -30,6 +30,7 @@ function tryFindDirectSolutionForRow(rowHints, solution, rowIndex) {
 
       // handle case where hint is a number equal to the remaining unknowns in row and unknowns are consecutive, e.g. hint is [3] and row is [X, undefined, undefined, undefined, X]
       const notXCellIndices = solution[rowIndex].map((value, index) => ({ value, index })).filter((c) => c.value !== 'X').map((c) => c.index);
+      console.log("*** not x", rowIndex, notXCellIndices, solution[rowIndex]);
       if (notXCellIndices.length === rowHints[0] && isArrayConsecutive(notXCellIndices)) {
         for (let i = 0; i < notXCellIndices.length; i++) {
           solution[rowIndex][notXCellIndices[i]] = 'O';
@@ -41,6 +42,7 @@ function tryFindDirectSolutionForRow(rowHints, solution, rowIndex) {
   const rowHintsSum = rowHints.reduce((accumulator, currentValue, currentIndex) => {
     return accumulator + currentValue + (currentIndex === rowHints.length - 1 ? 0 : 1);
   }, 0);
+  console.log("*** rowIndex", rowIndex, 'hintssum', rowHintsSum, 'row so far', solution[rowIndex])
   if (rowHintsSum === solution[rowIndex].length) {
     let fillIndex = 0;
     for (let rowHintsIndex = 0; rowHintsIndex < rowHints.length; rowHintsIndex++) {
@@ -54,19 +56,36 @@ function tryFindDirectSolutionForRow(rowHints, solution, rowIndex) {
       fillIndex++;
     }
   }
-  tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex);
+  console.log("*** before direct interval", solution[rowIndex])
+
+  // see if we have any more unknown cells. can't use .find() for this cus it skips undefined
+  let unknownCells = false;
+  for (let cellIndex = 0; cellIndex < solution[rowIndex].length; cellIndex++) {
+    if (!solution[rowIndex][cellIndex]) {
+      unknownCells = true;
+      break;
+    }
+  }
+  if (unknownCells) {
+    tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex);
+  }
 }
 
 function tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex) {
   // find solutions in intervals
   const rowLength = solution[rowIndex].length;
   const xIntervalStartIndices = [-1];
+  if (solution[rowIndex][0] !== 'X') { // ugly but maybe works?
+    xIntervalStartIndices.push(-1);
+  }
   solution[rowIndex].forEach((cell, cellIndex) => {
     if (cell === 'X') {
       xIntervalStartIndices.push(cellIndex);
     }
   });
   xIntervalStartIndices.push(rowLength); // pretend we have qan X at the start and end of the row
+  xIntervalStartIndices.splice(0, 1);
+  console.log("*** x intervals", xIntervalStartIndices);
 
   const lengthsOfIntervalsBetweenXs = xIntervalStartIndices.map((startOfIntervalIndex, index) => {
     if (index === 0) {
@@ -74,11 +93,14 @@ function tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex) {
     }
     return startOfIntervalIndex - 1 - xIntervalStartIndices[index - 1];
   }).filter(interval => interval !== 0);
-
   lengthsOfIntervalsBetweenXs.splice(0, 1);
+  console.log("*** lengths", lengthsOfIntervalsBetweenXs);
+
   if (isEqual(rowHints, lengthsOfIntervalsBetweenXs)) {
+    console.log("*** is equal");
     rowHints.forEach((rowHint, rowHintIndex) => {
       for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHint; cellToFillIndexOffsetFromStartOfInterval++) {
+        console.log("*** filling in", xIntervalStartIndices[rowHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1);
         solution[rowIndex][xIntervalStartIndices[rowHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1] = 'O';
       }
     });
@@ -515,24 +537,37 @@ export default function solve(level) {
   while (true) {
     const solutionAtStartOfPass = cloneDeep(solution);
     rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
+    if (DEBUG === 2) {
+      console.log("After direct solutions row\n", solution);
+    }
     columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
     if (DEBUG) {
       console.log("After direct solutions\n", solution);
     }
 
     rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
+    if (DEBUG === 2) {
+      console.log("After filled in impossible moves row\n", solution);
+    }
     columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
     if (DEBUG) {
       console.log("After filled in impossible moves\n", solution);
     }
 
     rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
+    if (DEBUG === 2) {
+      console.log("After sequentials solutions row\n", solution);
+    }
     columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
     if (DEBUG) {
       console.log("After sequential solutions\n", solution);
     }
 
     rowHints.forEach((row, index) => tryFindPartialSolutionForRow(row, solution, index));
+    if (DEBUG === 2) {
+      console.log("After partial solutions row\n", solution);
+    }
+
     columnHints.forEach((column, index) => tryFindPartialSolutionForColumn(column, solution, index));
     if (DEBUG) {
       console.log("After partial solutions\n", solution);
