@@ -56,6 +56,32 @@ describe('try find direct solution for row', () => {
     tryFindDirectSolutionForRow(rowHint, input, rowIndex);
     should.deepEqual(expectedResult, input);
   });
+
+  it('Test case 4', () => {
+    const input = [
+      ['O', 'O', 'X', undefined, undefined, 'X', 'O', undefined, 'X', 'O']
+    ];
+    const expectedResult = [
+      ['O', 'O', 'X', 'O', 'O', 'X', 'O', undefined, 'X', 'O']
+    ];
+    const rowHint = [2, 2, 1, 1];
+    const rowIndex = 0;
+    tryFindDirectSolutionForRow(rowHint, input, rowIndex);
+    should.deepEqual(expectedResult, input);
+  });
+
+  it('Test case 5', () => {
+    const input = [
+      ['O', 'O', 'X', 'X', undefined, undefined, 'X', 'X', 'O', 'O' ],
+    ];
+    const expectedResult = [
+      ['O', 'O', 'X', 'X', 'O', 'O', 'X', 'X', 'O', 'O' ],
+    ];
+    const rowHint = [2, 2, 2];
+    const rowIndex = 0;
+    tryFindDirectSolutionForRow(rowHint, input, rowIndex);
+    should.deepEqual(expectedResult, input);
+  });
 });
 
 describe('try find direct solution for column', () => {
@@ -75,6 +101,37 @@ describe('try find direct solution for column', () => {
       ['X']
     ];
     const columnHint = [3];
+    const columnIndex = 0;
+    tryFindDirectSolutionForColumn(columnHint, input, columnIndex);
+    should.deepEqual(expectedResult, input);
+  });
+
+  it('Test case 2', () => {
+    const input = [
+      ['O'],
+      ['O'],
+      ['X'],
+      [undefined],
+      [undefined],
+      ['X'],
+      ['O'],
+      [undefined],
+      ['X'],
+      ['O']
+    ];
+    const expectedResult = [
+      ['O'],
+      ['O'],
+      ['X'],
+      ['O'],
+      ['O'],
+      ['X'],
+      ['O'],
+      [undefined],
+      ['X'],
+      ['O']
+    ];
+    const columnHint = [2, 2, 1, 1];
     const columnIndex = 0;
     tryFindDirectSolutionForColumn(columnHint, input, columnIndex);
     should.deepEqual(expectedResult, input);
@@ -594,18 +651,18 @@ describe('Solver', () => {
     should.deepEqual(expectedSolution, actualSolution);
   });
 
-  it.skip('Should solve First steps 15', () => {
+  it('Should solve First steps 15', () => {
     const expectedSolution = [
-      ['O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'O', 'O', 'X', 'X', 'X', 'X'],
-      ['O', 'O', 'O', 'O', 'X', 'X', 'X', 'X', 'X', 'X'],
+      ['X', 'X', 'O', 'O', 'O', 'O', 'O', 'O', 'O', 'O'],
+      ['X', 'O', 'O', 'O', 'X', 'O', 'O', 'O', 'O', 'O'],
+      ['O', 'O', 'O', 'X', 'X', 'X', 'X', 'O', 'O', 'O'],
+      ['O', 'O', 'X', 'O', 'X', 'X', 'O', 'X', 'O', 'O'],
+      ['O', 'X', 'X', 'O', 'X', 'X', 'O', 'X', 'X', 'O'],
+      ['O', 'O', 'X', 'X', 'X', 'X', 'X', 'X', 'O', 'O'],
+      ['O', 'O', 'X', 'O', 'O', 'O', 'O', 'X', 'O', 'O'],
+      ['O', 'O', 'X', 'X', 'O', 'O', 'X', 'X', 'O', 'O'],
+      ['O', 'O', 'O', 'X', 'X', 'X', 'X', 'O', 'O', 'O'],
+      ['O', 'O', 'O', 'O', 'O', 'X', 'O', 'O', 'O', 'O'],
     ];
     const actualSolution = solve(LEVELS.FIRST_STEPS[14]);
     should.deepEqual(expectedSolution, actualSolution);

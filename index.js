@@ -1,4 +1,5 @@
 import { countBy, sum, sumBy, filter, cloneDeep, isEqual } from 'lodash';
+const DEBUG = 2;
 
 function isArrayConsecutive(arr) {
   for (let i = 0; i < arr.length - 1; i++) {
@@ -53,37 +54,57 @@ function tryFindDirectSolutionForRow(rowHints, solution, rowIndex) {
       fillIndex++;
     }
   }
-  tryFindDirectIntervalSolution(rowHints, solution, rowIndex);
+
+  // see if we have any more unknown cells. can't use .find() for this cus it skips undefined
+  let unknownCells = false;
+  for (let cellIndex = 0; cellIndex < solution[rowIndex].length; cellIndex++) {
+    if (!solution[rowIndex][cellIndex]) {
+      unknownCells = true;
+      break;
+    }
+  }
+  if (unknownCells) {
+    tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex);
+  }
 }
 
-function tryFindDirectIntervalSolution(rowHints, solution, rowIndex) {
+function tryFindDirectIntervalSolutionRow(rowHints, solution, rowIndex) {
   // find solutions in intervals
   const rowLength = solution[rowIndex].length;
-  const xIntervalStartIndices = [];
+  const xIntervalStartIndices = [-1];
+  if (solution[rowIndex][0] !== 'X') { // ugly but maybe works?
+    xIntervalStartIndices.push(-1);
+  }
   solution[rowIndex].forEach((cell, cellIndex) => {
     if (cell === 'X') {
-      xIntervalStartIndices.push(cellIndex + 1);
+      xIntervalStartIndices.push(cellIndex);
     }
   });
-  xIntervalStartIndices.push(rowLength + 1); // pretend we have qan X at the end of the row
+  xIntervalStartIndices.push(rowLength); // pretend we have qan X at the start and end of the row
+  xIntervalStartIndices.splice(0, 1);
 
   const lengthsOfIntervalsBetweenXs = xIntervalStartIndices.map((startOfIntervalIndex, index) => {
     if (index === 0) {
-      return xIntervalStartIndices[0];
+      return xIntervalStartIndices[index + 1];
     }
     return startOfIntervalIndex - 1 - xIntervalStartIndices[index - 1];
-  }).filter(interval => interval !== 1);
+  }).filter(interval => interval !== 0);
+  lengthsOfIntervalsBetweenXs.splice(0, 1);
 
-  if (isEqual(rowHints, lengthsOfIntervalsBetweenXs)) {
-    xIntervalStartIndices.forEach((startOfInterval, index) => {
-      if (startOfInterval === rowLength) {
-        return;
+  if (rowHints.length === lengthsOfIntervalsBetweenXs.length) {
+    let xIntervalIndex = 0;
+    for (let rowHintIndex = 0; rowHintIndex < rowHints.length; rowHintIndex++) {
+      if (xIntervalStartIndices[rowHintIndex + 1] && (xIntervalStartIndices[rowHintIndex + 1] - xIntervalStartIndices[rowHintIndex] === 1)) {
+        xIntervalIndex++;
+        continue;
       }
-
-      for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHints[index]; cellToFillIndexOffsetFromStartOfInterval++) {
-        solution[rowIndex][startOfInterval + cellToFillIndexOffsetFromStartOfInterval] = 'O';
+      if (isEqual(rowHints[rowHintIndex], lengthsOfIntervalsBetweenXs[rowHintIndex])) {
+        for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowHints[rowHintIndex]; cellToFillIndexOffsetFromStartOfInterval++) {
+          solution[rowIndex][xIntervalStartIndices[xIntervalIndex] + cellToFillIndexOffsetFromStartOfInterval + 1] = 'O';
+        }
       }
-    });
+      xIntervalIndex++;
+    }
   }
 }
 
@@ -165,38 +186,48 @@ function tryFindDirectSolutionForColumn(columnHints, solution, columnIndex) {
       fillIndex++;
     }
   }
-  tryFindDirectIntervalSolutionColumn(columnHints, solution, columnIndex);
+  let unknownCells = false;
+  for (let cellIndex = 0; cellIndex < columnAsArray.length; cellIndex++) {
+    if (!columnAsArray[cellIndex]) {
+      unknownCells = true;
+      break;
+    }
+  }
+  if (unknownCells) {
+    tryFindDirectIntervalSolutionColumn(columnHints, columnAsArray, columnIndex);
+  }
   columnToSolution(columnAsArray, columnIndex, solution);
 }
 
-function tryFindDirectIntervalSolutionColumn(columnHints, solution, columnIndex) {
+function tryFindDirectIntervalSolutionColumn(columnHints, columnAsArray) {
   // find solutions in intervals
-  const columnLength = solution.length;
-  const xIntervalStartIndices = [];
-  const columnAsArray = solution.map((row) => row[columnIndex]);
-
+  const columnLength = columnAsArray.length;
+  const xIntervalStartIndices = [-1];
+  if (columnAsArray[0] !== 'X') { // ugly but maybe works?
+    xIntervalStartIndices.push(-1);
+  }
   columnAsArray.forEach((cell, cellIndex) => {
     if (cell === 'X') {
-      xIntervalStartIndices.push(cellIndex + 1);
+      xIntervalStartIndices.push(cellIndex);
     }
   });
-  xIntervalStartIndices.push(columnLength + 1); // pretend we have qan X at the end of the row
+  xIntervalStartIndices.push(columnLength); // pretend we have qan X at the start and end of the row
+  xIntervalStartIndices.splice(0, 1);
 
   const lengthsOfIntervalsBetweenXs = xIntervalStartIndices.map((startOfIntervalIndex, index) => {
     if (index === 0) {
-      return xIntervalStartIndices[0];
+      return xIntervalStartIndices[index + 1];
     }
     return startOfIntervalIndex - 1 - xIntervalStartIndices[index - 1];
-  }).filter(interval => interval !== 1);
+  }).filter(interval => interval !== 0);
+  lengthsOfIntervalsBetweenXs.splice(0, 1);
 
-  if (isEqual(columnHints, lengthsOfIntervalsBetweenXs)) {
-    xIntervalStartIndices.forEach((startOfInterval, index) => {
-      if (startOfInterval === columnLength) {
-        return;
-      }
-
-      for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < columnHints[index]; cellToFillIndexOffsetFromStartOfInterval++) {
-        columnAsArray[startOfInterval + cellToFillIndexOffsetFromStartOfInterval] = 'O';
+  if (columnHints.length === lengthsOfIntervalsBetweenXs.length) {
+    columnHints.forEach((columnHint, columnHintIndex) => {
+      if (isEqual(columnHint, lengthsOfIntervalsBetweenXs[columnHintIndex])) {
+        for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < columnHint; cellToFillIndexOffsetFromStartOfInterval++) {
+          columnAsArray[xIntervalStartIndices[columnHintIndex] + cellToFillIndexOffsetFromStartOfInterval + 1] = 'O';
+        }
       }
     });
   }
@@ -517,16 +548,41 @@ export default function solve(level) {
   while (true) {
     const solutionAtStartOfPass = cloneDeep(solution);
     rowHints.forEach((row, index) => tryFindDirectSolutionForRow(row, solution, index));
+    if (DEBUG === 2) {
+      console.log("After direct solutions row\n", solution);
+    }
     columnHints.forEach((column, index) => tryFindDirectSolutionForColumn(column, solution, index));
+    if (DEBUG) {
+      console.log("After direct solutions\n", solution);
+    }
 
     rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
+    if (DEBUG === 2) {
+      console.log("After filled in impossible moves row\n", solution);
+    }
     columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
+    if (DEBUG) {
+      console.log("After filled in impossible moves\n", solution);
+    }
 
     rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
+    if (DEBUG === 2) {
+      console.log("After sequentials solutions row\n", solution);
+    }
     columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
+    if (DEBUG) {
+      console.log("After sequential solutions\n", solution);
+    }
 
     rowHints.forEach((row, index) => tryFindPartialSolutionForRow(row, solution, index));
+    if (DEBUG === 2) {
+      console.log("After partial solutions row\n", solution);
+    }
+
     columnHints.forEach((column, index) => tryFindPartialSolutionForColumn(column, solution, index));
+    if (DEBUG) {
+      console.log("After partial solutions\n", solution);
+    }
 
     // if no changes have been made, we break and return partial solution
     if (isEqual(solution, solutionAtStartOfPass)) {
