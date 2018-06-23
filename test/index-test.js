@@ -10,8 +10,7 @@ const getColumn = app.__get__('getColumn');
 const columnToSolution = app.__get__('columnToSolution');
 const isValidSolution = app.__get__('isValidSolution');
 const fillInMissingCells = app.__get__('fillInMissingCells');
-const fillImpossibleMovesForRow = app.__get__('fillImpossibleMovesForRow');
-const fillImpossibleMovesForColumn = app.__get__('fillImpossibleMovesForColumn');
+const fillImpossibleMovesForRowOrColumn = app.__get__('fillImpossibleMovesForRowOrColumn');
 const tryFindPartialSolutionForRow = app.__get__('tryFindPartialSolutionForRow');
 const tryFindSequentialSolutionForRowOrColumn = app.__get__('tryFindSequentialSolutionForRowOrColumn');
 const tryFindDirectSolutionForRowOrColumn = app.__get__('tryFindDirectSolutionForRowOrColumn');
@@ -51,7 +50,7 @@ describe('try find direct solution for row', () => {
 
   it('Test case 5', () => {
     const input = ['O', 'O', 'X', 'X', undefined, undefined, 'X', 'X', 'O', 'O'];
-    const expectedResult = ['O', 'O', 'X', 'X', 'O', 'O', 'X', 'X', 'O', 'O' ];
+    const expectedResult = ['O', 'O', 'X', 'X', 'O', 'O', 'X', 'X', 'O', 'O'];
     const rowHint = [2, 2, 2];
     const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
     should.deepEqual(expectedResult, actualResult);
@@ -183,26 +182,26 @@ describe('Try find sequential solution for row or column', () => {
   });
 }),
 
-describe('fillInMissingCellsWithX', () => {
-  it('test case 1', () => {
-    const input = [
-      [, , , 'O', undefined],
-      [, , , 'O', undefined],
-      ['O', 'O', 'O', 'O', 'O'],
-      ['O', 'O', 'O', 'O', 'O'],
-      ['O', 'O', 'O', 'O', 'O']
-    ];
-    const expectedResult = [
-      ['X', 'X', 'X', 'O', 'X'],
-      ['X', 'X', 'X', 'O', 'X'],
-      ['O', 'O', 'O', 'O', 'O'],
-      ['O', 'O', 'O', 'O', 'O'],
-      ['O', 'O', 'O', 'O', 'O']
-    ];
-    const actualResult = fillInMissingCells(input, 'X');
-    should.deepEqual(expectedResult, actualResult);
-  });
-})
+  describe('fillInMissingCellsWithX', () => {
+    it('test case 1', () => {
+      const input = [
+        [, , , 'O', undefined],
+        [, , , 'O', undefined],
+        ['O', 'O', 'O', 'O', 'O'],
+        ['O', 'O', 'O', 'O', 'O'],
+        ['O', 'O', 'O', 'O', 'O']
+      ];
+      const expectedResult = [
+        ['X', 'X', 'X', 'O', 'X'],
+        ['X', 'X', 'X', 'O', 'X'],
+        ['O', 'O', 'O', 'O', 'O'],
+        ['O', 'O', 'O', 'O', 'O'],
+        ['O', 'O', 'O', 'O', 'O']
+      ];
+      const actualResult = fillInMissingCells(input, 'X');
+      should.deepEqual(expectedResult, actualResult);
+    });
+  })
 
 describe('Is valid solution', () => {
   it('Test case 1 correct solution', () => {
@@ -263,175 +262,45 @@ describe('Is valid solution', () => {
   });
 });
 
-describe('Fill in impossible moves for row', () => {
+describe('Fill in impossible moves for row or column', () => {
   it('Test case 1', () => {
-    const solution = [
-      [undefined, undefined, undefined, 'O', undefined],
-      [],
-      [],
-      [],
-      []
-    ];
-    const expectedResult = [
-      ['X', undefined, undefined, 'O', undefined],
-      [],
-      [],
-      [],
-      []
-    ];
-    const rowHints = [3];
-    const rowIndex = 0;
-    fillImpossibleMovesForRow(rowHints, solution, rowIndex);
-    should.deepEqual(solution, expectedResult);
+    const input = [undefined, undefined, undefined, 'O', undefined];
+    const expectedResult = ['X', undefined, undefined, 'O', undefined];
+    const rowHint = [3];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
 
   it('Test case 2', () => {
-    const solution = [
-      [undefined, undefined, undefined, undefined, 'O'],
-      [],
-      [],
-      [],
-      []
-    ];
-    const expectedResult = [
-      ['X', 'X', undefined, undefined, 'O'],
-      [],
-      [],
-      [],
-      []
-    ];
-    const rowHints = [3];
-    const rowIndex = 0;
-    fillImpossibleMovesForRow(rowHints, solution, rowIndex);
-    should.deepEqual(solution, expectedResult);
+    const input = [undefined, undefined, undefined, undefined, 'O'];
+    const expectedResult = ['X', 'X', undefined, undefined, 'O'];
+    const rowHint = [3];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
 
   it('Test case 3', () => {
-    const solution = [
-      ['O', undefined, undefined, undefined, undefined],
-      [],
-      [],
-      [],
-      []
-    ];
-    const expectedResult = [
-      ['O', undefined, undefined, 'X', 'X'],
-      [],
-      [],
-      [],
-      []
-    ];
-    const rowHints = [3];
-    const rowIndex = 0;
-    fillImpossibleMovesForRow(rowHints, solution, rowIndex);
-    should.deepEqual(solution, expectedResult);
+    const input = ['O', undefined, undefined, undefined, undefined];
+    const expectedResult = ['O', undefined, undefined, 'X', 'X'];
+    const rowHint = [3];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
 
   it('Test case 4', () => {
-    const solution = [
-      [undefined, undefined, 'O', undefined, undefined],
-      [],
-      [],
-      [],
-      []
-    ];
-    const expectedResult = [
-      ['X', undefined, 'O', undefined, 'X'],
-      [],
-      [],
-      [],
-      []
-    ];
-    const rowHints = [2];
-    const rowIndex = 0;
-    fillImpossibleMovesForRow(rowHints, solution, rowIndex);
-    should.deepEqual(solution, expectedResult);
+    const input = [undefined, undefined, 'O', undefined, undefined];
+    const expectedResult = ['X', undefined, 'O', undefined, 'X'];
+    const rowHint = [2];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
 
   it('Test case 5', () => {
-    const solution = [
-      ['O', 'O', 'X', 'O', undefined],
-      [],
-      [],
-      [],
-      []
-    ];
-    const expectedResult = [
-      ['O', 'O', 'X', 'O', 'X'],
-      [],
-      [],
-      [],
-      []
-    ];
-    const rowHints = [2, 1];
-    const rowIndex = 0;
-    fillImpossibleMovesForRow(rowHints, solution, rowIndex);
-    should.deepEqual(solution, expectedResult);
-  });
-});
-
-describe('Fill in impossible moves for column', () => {
-  it('Test case 1', () => {
-    const solution = [
-      [undefined],
-      [undefined],
-      [undefined],
-      ['O'],
-      [undefined]
-    ];
-    const expectedResult = [
-      ['X'],
-      [undefined],
-      [undefined],
-      ['O'],
-      [undefined]
-    ];
-    const columnHints = [3];
-    const columnIndex = 0;
-    fillImpossibleMovesForColumn(columnHints, solution, columnIndex);
-    should.deepEqual(solution, expectedResult);
-  });
-
-  it('Test case 2', () => {
-    const solution = [
-      [undefined],
-      [undefined],
-      [undefined],
-      [undefined],
-      ['O']
-    ];
-    const expectedResult = [
-      ['X'],
-      ['X'],
-      [undefined],
-      [undefined],
-      ['O']
-    ];
-    const columnHints = [3];
-    const columnIndex = 0;
-    fillImpossibleMovesForColumn(columnHints, solution, columnIndex);
-    should.deepEqual(solution, expectedResult);
-  });
-
-  it('Test case 3', () => {
-    const solution = [
-      ['O'],
-      [undefined],
-      [undefined],
-      [undefined],
-      [undefined]
-    ];
-    const expectedResult = [
-      ['O'],
-      [undefined],
-      [undefined],
-      ['X'],
-      ['X']
-    ];
-    const columnHints = [3];
-    const columnIndex = 0;
-    fillImpossibleMovesForColumn(columnHints, solution, columnIndex);
-    should.deepEqual(solution, expectedResult);
+    const input = ['O', 'O', 'X', 'O', undefined];
+    const expectedResult = ['O', 'O', 'X', 'O', 'X'];
+    const rowHint = [2, 1];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
 });
 

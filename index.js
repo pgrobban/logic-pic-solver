@@ -190,141 +190,76 @@ function isValidSolution(level, solution) {
   return true;
 }
 
-function fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex) {
+function fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solutionSoFar) {
+  const possibleSolution = solutionSoFar;
   let cellIndex = foundFirstOCellIndex + 1;
   for (let cellsFilledWithPossibleO = 0;
-    numberOfPossibleOToFillInOneDirection > 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < solution.length;
+    numberOfPossibleOToFillInOneDirection > 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < possibleSolution.length;
     cellIndex++ , cellsFilledWithPossibleO++) {
-    if (!solution[rowIndex][cellIndex]) {
-      solution[rowIndex][cellIndex] = 'Possible O';
+    if (!possibleSolution[cellIndex]) {
+      possibleSolution[cellIndex] = 'Possible O';
     }
   }
 
   // we know the rest is impossible so fill with X
-  while (cellIndex < solution[rowIndex].length) {
-    if (solution[rowIndex][cellIndex] !== 'O') {
-      solution[rowIndex][cellIndex] = 'X';
+  while (cellIndex < possibleSolution.length) {
+    if (possibleSolution[cellIndex] !== 'O') {
+      possibleSolution[cellIndex] = 'X';
     }
     cellIndex++;
   }
+  return possibleSolution;
 }
 
-function fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex) {
+function fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solutionSoFar) {
+  const possibleSolution = solutionSoFar;
   let cellIndex = foundFirstOCellIndex - 1;
 
   for (let cellsFilledWithPossibleO = 0;
     numberOfPossibleOToFillInOneDirection >= 1 && // since we include middle
-    cellIndex >= 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < solution.length;
+    cellIndex >= 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < possibleSolution.length;
     cellIndex-- , cellsFilledWithPossibleO++) {
-    if (!solution[rowIndex][cellIndex]) {
-      solution[rowIndex][cellIndex] = 'Possible O';
+    if (!possibleSolution[cellIndex]) {
+      possibleSolution[cellIndex] = 'Possible O';
     }
   }
 
   // we know the rest is impossible so fill with X
   while (cellIndex >= 0) {
-    if (solution[rowIndex][cellIndex] !== 'O') {
-      solution[rowIndex][cellIndex] = 'X';
+    if (possibleSolution[cellIndex] !== 'O') {
+      possibleSolution[cellIndex] = 'X';
     }
     cellIndex--;
   }
+  return possibleSolution;
 }
 
-function fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray) {
-  let cellIndex = foundFirstOCellIndex + 1;
-
-  for (let cellsFilledWithPossibleO = 0;
-    numberOfPossibleOToFillInOneDirection > 0 && cellsFilledWithPossibleO !== numberOfPossibleOToFillInOneDirection && cellIndex < columnAsArray.length;
-    cellIndex++ , cellsFilledWithPossibleO++) {
-    if (!columnAsArray[cellIndex]) {
-      columnAsArray[cellIndex] = 'Possible O';
-    }
-  }
-
-  // we know the rest is impossible so fill with X
-  while (cellIndex < columnAsArray.length) {
-    if (columnAsArray[cellIndex] !== 'O') {
-      columnAsArray[cellIndex] = 'X';
-    }
-    cellIndex++;
-  }
-}
-
-
-function fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray) {
-  let cellIndex = foundFirstOCellIndex - 1;
-
-  // try to fill to left with possible Os
-  for (let cellsFilledWithPossibleO = 0;
-    numberOfPossibleOToFillInOneDirection > 0 && cellIndex >= 0 && cellsFilledWithPossibleO < numberOfPossibleOToFillInOneDirection;
-    cellIndex-- , cellsFilledWithPossibleO++) {
-    if (!columnAsArray[cellIndex]) {
-      columnAsArray[cellIndex] = 'Possible O';
-    }
-  }
-
-  // we know the rest is impossible so fill with X
-  while (cellIndex >= 0) {
-    if (columnAsArray[cellIndex] !== 'O') {
-      columnAsArray[cellIndex] = 'X';
-    }
-    cellIndex--;
-  }
-}
-
-function fillImpossibleMovesForRow(rowHints, solution, rowIndex) {
-  const numberOfKnownOsInRow = solution[rowIndex].filter((cell) => cell === 'O').length;
-  if (numberOfKnownOsInRow === sum(rowHints)) {
-    solution[rowIndex].forEach((cell, cellIndex) => {
+function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
+  let possibleSolution = rowOrColumnSoFar;
+  const numberOfKnownOsInRow = rowOrColumnSoFar.filter((cell) => cell === 'O').length;
+  if (numberOfKnownOsInRow === sum(rowOrColumnHints)) {
+    rowOrColumnSoFar.forEach((cell, cellIndex) => {
       if (!cell) {
-        solution[rowIndex][cellIndex] = 'X';
+        rowOrColumnSoFar[cellIndex] = 'X';
       }
     });
   }
 
-  if (rowHints.length === 1) {
-    const foundFirstOCellIndex = solution[rowIndex].findIndex((cell) => cell === 'O');
+  if (rowOrColumnHints.length === 1) {
+    const foundFirstOCellIndex = possibleSolution.findIndex((cell) => cell === 'O');
     if (foundFirstOCellIndex !== -1) {
-      const numberOfPossibleOToFillInOneDirection = rowHints[0] - 1;
-      fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex);
-      fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solution, rowIndex);
+      const numberOfPossibleOToFillInOneDirection = rowOrColumnHints[0] - 1;
+      possibleSolution = fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, possibleSolution);
+      possibleSolution = fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, possibleSolution);
 
-      solution[rowIndex].forEach((cell, cellIndex) => {
+      possibleSolution.forEach((cell, cellIndex) => {
         if (cell === 'Possible O') {
-          solution[rowIndex][cellIndex] = undefined;
+          possibleSolution[cellIndex] = undefined;
         }
       });
     }
   }
-}
-
-function fillImpossibleMovesForColumn(columnHints, solution, columnIndex) {
-  let columnAsArray = solution.map((row) => row[columnIndex]);
-  const numberOfKnownOsInRow = columnAsArray.filter((cell) => cell === 'O').length;
-  if (numberOfKnownOsInRow === sum(columnHints)) {
-    columnAsArray.forEach((cell, cellIndex) => {
-      if (!cell) {
-        columnAsArray[cellIndex] = 'X';
-      }
-    });
-  }
-
-  if (columnHints.length === 1) {
-    const foundFirstOCellIndex = columnAsArray.findIndex((cell) => cell === 'O');
-
-    if (foundFirstOCellIndex !== -1) {
-      const numberOfPossibleOToFillInOneDirection = columnHints[0] - 1;
-      fillPossibleOFromMiddlePlusOneToUpColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray, columnIndex);
-      fillPossibleOFromMiddleMinusOneToDownColumn(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, columnAsArray, columnIndex);
-
-      columnAsArray.forEach((cell, cellIndex) => {
-        if (cell === 'Possible O') {
-          columnAsArray[cellIndex] = undefined;
-        }
-      });
-    }
-  }
-  columnToSolution(columnAsArray, columnIndex, solution);
+  return possibleSolution;
 }
 
 function getLongestNonXSequence(row) {
@@ -444,11 +379,17 @@ export default function solve(level) {
       console.log("After direct solutions\n", solution);
     }
 
-    rowHints.forEach((row, index) => fillImpossibleMovesForRow(row, solution, index));
+    rowHints.forEach((row, rowIndex) => {
+      solution[rowIndex] = fillImpossibleMovesForRowOrColumn(row, solution[rowIndex]);
+    });
     if (DEBUG === 2) {
       console.log("After filled in impossible moves row\n", solution);
     }
-    columnHints.forEach((column, index) => fillImpossibleMovesForColumn(column, solution, index));
+    columnHints.forEach((columnHint, columnIndex) => {
+      const column = getColumn(solution, columnIndex);
+      const columnSolution = fillImpossibleMovesForRowOrColumn(columnHint, column);
+      columnToSolution(columnSolution, columnIndex, solution);
+    });
     if (DEBUG) {
       console.log("After filled in impossible moves\n", solution);
     }
