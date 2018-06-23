@@ -264,6 +264,30 @@ describe('Is valid solution', () => {
     ];
     isValidSolution(LEVELS.FIRST_STEPS[0], solution).should.be.true();
   });
+
+  it('Test case with multiple possible solutions', () => {
+    const level = {
+      columnHints: [
+        [1],
+        [1]
+      ],
+      rowHints: [
+        [1],
+        [1]
+      ]
+    };
+    const solution1 = [
+      ['O', 'X'],
+      ['X', 'O']
+    ];
+    isValidSolution(level, solution1).should.be.true();
+
+    const solution2 = [
+      ['X', 'O'],
+      ['O', 'X']
+    ];
+    isValidSolution(level, solution2).should.be.true();
+  });
 });
 
 describe('Fill in impossible moves for row', () => {

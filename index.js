@@ -1,5 +1,5 @@
-import { countBy, sum, sumBy, filter, cloneDeep, isEqual } from 'lodash';
-const DEBUG = 2;
+import { sum, sumBy, cloneDeep, isEqual } from 'lodash';
+const DEBUG = 0;
 
 function isArrayConsecutive(arr) {
   for (let i = 0; i < arr.length - 1; i++) {
