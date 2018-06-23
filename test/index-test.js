@@ -13,8 +13,7 @@ const fillInMissingCells = app.__get__('fillInMissingCells');
 const fillImpossibleMovesForRow = app.__get__('fillImpossibleMovesForRow');
 const fillImpossibleMovesForColumn = app.__get__('fillImpossibleMovesForColumn');
 const tryFindPartialSolutionForRow = app.__get__('tryFindPartialSolutionForRow');
-const tryFindSequentialSolutionForRow = app.__get__('tryFindSequentialSolutionForRow');
-const tryFindSequentialSolutionForColumn = app.__get__('tryFindSequentialSolutionForColumn');
+const tryFindSequentialSolutionForRowOrColumn = app.__get__('tryFindSequentialSolutionForRowOrColumn');
 const tryFindDirectSolutionForRowOrColumn = app.__get__('tryFindDirectSolutionForRowOrColumn');
 
 describe('try find direct solution for row', () => {
@@ -118,43 +117,35 @@ describe('try find direct solution for row', () => {
   });
 });
 
-describe('Try find sequential solution for row', () => {
+describe('Try find sequential solution for row or column', () => {
   it('test case 1', () => {
-    const input = [
-      ['O', undefined, undefined, undefined, undefined]
-    ];
-    const expectedResult = [
-      ['O', 'O', 'X', undefined, undefined]
-    ];
+    const input = ['O', undefined, undefined, undefined, undefined];
+    const expectedResult = ['O', 'O', 'X', undefined, undefined];
     const rowHint = [2, 1];
-    const rowIndex = 0;
-    tryFindSequentialSolutionForRow(rowHint, input, rowIndex);
-    should.deepEqual(expectedResult, input);
+    const actualResult = tryFindSequentialSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
 
   it('test case 2', () => {
-    const input = [
-      [undefined, undefined, undefined, undefined, 'O']
-    ];
-    const expectedResult = [
-      [undefined, undefined, 'X', 'O', 'O']
-    ];
+    const input = [undefined, undefined, undefined, undefined, 'O'];
+    const expectedResult = [undefined, undefined, 'X', 'O', 'O'];
     const rowHint = [1, 2];
-    const rowIndex = 0;
-    tryFindSequentialSolutionForRow(rowHint, input, rowIndex);
-    should.deepEqual(expectedResult, input);
+    const actualResult = tryFindSequentialSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
-});
 
-describe('Try find sequential solution for column', () => {
-  it('test case 1', () => {
-    const input = [
+  it('test case 1 column', () => {
+    const solutionSoFar = [
       ['O'],
       [undefined],
       [undefined],
       [undefined],
       [undefined]
     ];
+
+    const columnHint = [2, 1];
+    const columnIndex = 0;
+    const column = getColumn(solutionSoFar, columnIndex);
     const expectedResult = [
       ['O'],
       ['O'],
@@ -162,20 +153,23 @@ describe('Try find sequential solution for column', () => {
       [undefined],
       [undefined],
     ];
-    const columnHint = [2, 1];
-    const columnIndex = 0;
-    tryFindSequentialSolutionForColumn(columnHint, input, columnIndex);
-    should.deepEqual(expectedResult, input);
+    const columnSolution = tryFindSequentialSolutionForRowOrColumn(columnHint, column);
+    columnToSolution(columnSolution, columnIndex, solutionSoFar);
+    should.deepEqual(expectedResult, solutionSoFar);
   });
 
   it('test case 2', () => {
-    const input = [
+    const solutionSoFar = [
       [undefined],
       [undefined],
       [undefined],
       [undefined],
       ['O']
     ];
+
+    const columnHint = [1, 2];
+    const columnIndex = 0;
+    const column = getColumn(solutionSoFar, columnIndex);
     const expectedResult = [
       [undefined],
       [undefined],
@@ -183,10 +177,9 @@ describe('Try find sequential solution for column', () => {
       ['O'],
       ['O']
     ];
-    const columnHint = [1, 2];
-    const columnIndex = 0;
-    tryFindSequentialSolutionForColumn(columnHint, input, columnIndex);
-    should.deepEqual(expectedResult, input);
+    const columnSolution = tryFindSequentialSolutionForRowOrColumn(columnHint, column);
+    columnToSolution(columnSolution, columnIndex, solutionSoFar);
+    should.deepEqual(expectedResult, solutionSoFar);
   });
 }),
 

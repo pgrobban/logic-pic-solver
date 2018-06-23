@@ -116,91 +116,48 @@ function tryFindDirectIntervalSolutionForRowOrColumn(rowOrColumnHints, rowOrColu
   return possibleSolution;
 }
 
-function tryFindSequentialSolutionForRow(rowHints, solution, rowIndex) {
+function tryFindSequentialSolutionForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
+  const possibleSolution = rowOrColumnSoFar;
   // try solve simple case: eg rowHint [3] and solution row [X, undefined, O, undefined, X] then we can fill in like so [X, O, O, O, X]
   // first find the indices
-  const knownXAndUnknownIndicesForRow = solution[rowIndex].reduce((accumulator, currentValue, currentIndex) => {
+  const knownXAndUnknownIndicesForRow = possibleSolution.reduce((accumulator, currentValue, currentIndex) => {
     if (currentValue !== 'X') {
       accumulator.push(currentIndex);
     }
     return accumulator;
   }, []);
-  if (rowHints.length === 0) {
+  if (rowOrColumnHints.length === 0) {
     // if the indices are consecutive, then we know we have a unique solution
-    if (rowHints[0] === knownXAndUnknownIndicesForRow.length && isArrayConsecutive(knownXAndUnknownIndicesForRow)) {
+    if (rowOrColumnHints[0] === knownXAndUnknownIndicesForRow.length && isArrayConsecutive(knownXAndUnknownIndicesForRow)) {
       // so we can replace all cells with those indices with O
       for (let i = 0; i < knownXAndUnknownIndicesForRow.length; i++) {
-        solution[rowIndex][knownXAndUnknownIndicesForRow[i]] = 'O';
+        possibleSolution[knownXAndUnknownIndicesForRow[i]] = 'O';
       }
     }
   }
   // if we know there is an O one side, we can fill in some more known Os from the first hint
-  if (solution[rowIndex][0] === 'O') {
+  if (possibleSolution[0] === 'O') {
     let cellIndex = 0;
-    for (; cellIndex < rowHints[0]; cellIndex++) {
-      solution[rowIndex][cellIndex] = 'O';
+    for (; cellIndex < rowOrColumnHints[0]; cellIndex++) {
+      possibleSolution[cellIndex] = 'O';
     }
-    if (cellIndex !== solution[rowIndex].length) {
-      solution[rowIndex][cellIndex] = 'X';
+    if (cellIndex !== possibleSolution.length) {
+      possibleSolution[cellIndex] = 'X';
     }
   }
 
-  const lastCellIndex = solution[rowIndex].length - 1;
-  if (solution[rowIndex][lastCellIndex] === 'O') {
-    const cellsToFill = rowHints[rowHints.length - 1];
+  const lastCellIndex = possibleSolution.length - 1;
+  if (possibleSolution[lastCellIndex] === 'O') {
+    const cellsToFill = rowOrColumnHints[rowOrColumnHints.length - 1];
     let cellIndex = lastCellIndex;
     for (; cellIndex > lastCellIndex - cellsToFill; cellIndex--) {
-      solution[rowIndex][cellIndex] = 'O';
+      possibleSolution[cellIndex] = 'O';
     }
     if (cellIndex >= 0) {
-      solution[rowIndex][cellIndex] = 'X';
+      possibleSolution[cellIndex] = 'X';
     }
   }
-}
-
-function tryFindSequentialSolutionForColumn(columnHints, solution, columnIndex) {
-  const columnAsArray = solution.map((row) => row[columnIndex]);
-
-  // try solve simple case: eg rowHint [3] and solution row [X, undefined, O, undefined, X] then we can fill in like so [X, O, O, O, X]
-  // first find the indices
-  const knownXAndUnknownIndicesForColumn = columnAsArray.reduce((accumulator, currentValue, currentIndex) => {
-    if (currentValue !== 'X') {
-      accumulator.push(currentIndex);
-    }
-    return accumulator;
-  }, []);
-  if (columnHints.length === 0) {
-    // if the indices are consecutive, then we know we have a unique solution
-    if (columnHints[0] === knownXAndUnknownIndicesForColumn.length && isArrayConsecutive(knownXAndUnknownIndicesForColumn)) {
-      // so we can replace all cells with those indices with O
-      for (let i = 0; i < knownXAndUnknownIndicesForColumn.length; i++) {
-        columnAsArray[knownXAndUnknownIndicesForColumn[i]] = 'O';
-      }
-    }
-  }
-  // if we know there is an O one side, we can fill in some more known Os from the first hint
-  if (columnAsArray[0] === 'O') {
-    let cellIndex = 0;
-    for (; cellIndex < columnHints[0]; cellIndex++) {
-      columnAsArray[cellIndex] = 'O';
-    }
-    if (cellIndex !== columnAsArray.length) {
-      columnAsArray[cellIndex] = 'X';
-    }
-  }
-
-  const lastCellIndex = columnAsArray.length - 1;
-  if (columnAsArray[lastCellIndex] === 'O') {
-    const cellsToFill = columnHints[columnHints.length - 1];
-    let cellIndex = lastCellIndex;
-    for (; cellIndex > lastCellIndex - cellsToFill; cellIndex--) {
-      columnAsArray[cellIndex] = 'O';
-    }
-    if (cellIndex >= 0) {
-      columnAsArray[cellIndex] = 'X';
-    }
-  }
-  columnToSolution(columnAsArray, columnIndex, solution);
+  return possibleSolution;
 }
 
 function isValidSolution(level, solution) {
@@ -496,11 +453,17 @@ export default function solve(level) {
       console.log("After filled in impossible moves\n", solution);
     }
 
-    rowHints.forEach((row, index) => tryFindSequentialSolutionForRow(row, solution, index));
+    rowHints.forEach((row, rowIndex) => {
+      solution[rowIndex] = tryFindSequentialSolutionForRowOrColumn(row, solution[rowIndex]);
+    });
     if (DEBUG === 2) {
       console.log("After sequentials solutions row\n", solution);
     }
-    columnHints.forEach((column, index) => tryFindSequentialSolutionForColumn(column, solution, index));
+    columnHints.forEach((columnHint, columnIndex) => {
+      const column = getColumn(solution, columnIndex);
+      const columnSolution = tryFindSequentialSolutionForRowOrColumn(columnHint, column);
+      columnToSolution(columnSolution, columnIndex, solution);
+    });
     if (DEBUG) {
       console.log("After sequential solutions\n", solution);
     }
