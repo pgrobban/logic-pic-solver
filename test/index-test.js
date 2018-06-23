@@ -6,6 +6,8 @@ import LEVELS from './levels';
 
 const app = rewire('../index');
 
+const getColumn = app.__get__('getColumn');
+const columnToSolution = app.__get__('columnToSolution');
 const isValidSolution = app.__get__('isValidSolution');
 const fillInMissingCells = app.__get__('fillInMissingCells');
 const fillImpossibleMovesForRow = app.__get__('fillImpossibleMovesForRow');
@@ -13,101 +15,76 @@ const fillImpossibleMovesForColumn = app.__get__('fillImpossibleMovesForColumn')
 const tryFindPartialSolutionForRow = app.__get__('tryFindPartialSolutionForRow');
 const tryFindSequentialSolutionForRow = app.__get__('tryFindSequentialSolutionForRow');
 const tryFindSequentialSolutionForColumn = app.__get__('tryFindSequentialSolutionForColumn');
-const tryFindDirectSolutionForRow = app.__get__('tryFindDirectSolutionForRow');
-const tryFindDirectSolutionForColumn = app.__get__('tryFindDirectSolutionForColumn');
-
+const tryFindDirectSolutionForRowOrColumn = app.__get__('tryFindDirectSolutionForRowOrColumn');
 
 describe('try find direct solution for row', () => {
   it('Test case 1', () => {
-    const input = [
-      ['X', undefined, undefined, undefined, 'X']
-    ];
-    const expectedResult = [
-      ['X', 'O', 'O', 'O', 'X']
-    ];
+    const input = ['X', undefined, undefined, undefined, 'X'];
+    const expectedResult = ['X', 'O', 'O', 'O', 'X'];
     const rowHint = [3];
-    const rowIndex = 0;
-    tryFindDirectSolutionForRow(rowHint, input, rowIndex);
-    should.deepEqual(expectedResult, input);
+    const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
 
   it('Test case 2', () => {
-    const input = [
-      ['X', undefined, 'O', 'O', 'X']
-    ];
-    const expectedResult = [
-      ['X', 'O', 'O', 'O', 'X']
-    ];
+    const input = ['X', undefined, 'O', 'O', 'X'];
+    const expectedResult = ['X', 'O', 'O', 'O', 'X'];
     const rowHint = [3];
-    const rowIndex = 0;
-    tryFindDirectSolutionForRow(rowHint, input, rowIndex);
-    should.deepEqual(expectedResult, input);
+    const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
 
   it('Test case 3', () => {
-    const input = [
-      ['X', undefined, 'O', 'O', 'X', 'O', 'O', 'O', 'O', 'O']
-    ];
-    const expectedResult = [
-      ['X', 'O', 'O', 'O', 'X', 'O', 'O', 'O', 'O', 'O']
-    ];
+    const input = ['X', undefined, 'O', 'O', 'X', 'O', 'O', 'O', 'O', 'O'];
+    const expectedResult = ['X', 'O', 'O', 'O', 'X', 'O', 'O', 'O', 'O', 'O'];
     const rowHint = [3, 5];
-    const rowIndex = 0;
-    tryFindDirectSolutionForRow(rowHint, input, rowIndex);
-    should.deepEqual(expectedResult, input);
+    const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
 
   it('Test case 4', () => {
-    const input = [
-      ['O', 'O', 'X', undefined, undefined, 'X', 'O', undefined, 'X', 'O']
-    ];
-    const expectedResult = [
-      ['O', 'O', 'X', 'O', 'O', 'X', 'O', undefined, 'X', 'O']
-    ];
+    const input = ['O', 'O', 'X', undefined, undefined, 'X', 'O', undefined, 'X', 'O'];
+    const expectedResult = ['O', 'O', 'X', 'O', 'O', 'X', 'O', undefined, 'X', 'O'];
     const rowHint = [2, 2, 1, 1];
-    const rowIndex = 0;
-    tryFindDirectSolutionForRow(rowHint, input, rowIndex);
-    should.deepEqual(expectedResult, input);
+    const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
 
   it('Test case 5', () => {
-    const input = [
-      ['O', 'O', 'X', 'X', undefined, undefined, 'X', 'X', 'O', 'O' ],
-    ];
-    const expectedResult = [
-      ['O', 'O', 'X', 'X', 'O', 'O', 'X', 'X', 'O', 'O' ],
-    ];
+    const input = ['O', 'O', 'X', 'X', undefined, undefined, 'X', 'X', 'O', 'O'];
+    const expectedResult = ['O', 'O', 'X', 'X', 'O', 'O', 'X', 'X', 'O', 'O' ];
     const rowHint = [2, 2, 2];
-    const rowIndex = 0;
-    tryFindDirectSolutionForRow(rowHint, input, rowIndex);
-    should.deepEqual(expectedResult, input);
+    const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
-});
 
-describe('try find direct solution for column', () => {
-  it('Test case 1', () => {
-    const input = [
+  it('Test case 1 column', () => {
+    const solutionSoFar = [
       ['X'],
       [undefined],
       [undefined],
       [undefined],
       ['X']
     ];
-    const expectedResult = [
-      ['X'],
-      ['O'],
-      ['O'],
-      ['O'],
-      ['X']
-    ];
+
     const columnHint = [3];
     const columnIndex = 0;
-    tryFindDirectSolutionForColumn(columnHint, input, columnIndex);
-    should.deepEqual(expectedResult, input);
+    const column = getColumn(solutionSoFar, columnIndex);
+    const expectedResult = [
+      ['X'],
+      ['O'],
+      ['O'],
+      ['O'],
+      ['X']
+    ];
+
+    const columnSolution = tryFindDirectSolutionForRowOrColumn(columnHint, column);
+    columnToSolution(columnSolution, columnIndex, solutionSoFar);
+    should.deepEqual(expectedResult, solutionSoFar);
   });
 
-  it('Test case 2', () => {
-    const input = [
+  it('Test case 2 column', () => {
+    const solutionSoFar = [
       ['O'],
       ['O'],
       ['X'],
@@ -119,6 +96,10 @@ describe('try find direct solution for column', () => {
       ['X'],
       ['O']
     ];
+
+    const columnHint = [2, 2, 1, 1];
+    const columnIndex = 0;
+    const column = getColumn(solutionSoFar, columnIndex);
     const expectedResult = [
       ['O'],
       ['O'],
@@ -131,10 +112,9 @@ describe('try find direct solution for column', () => {
       ['X'],
       ['O']
     ];
-    const columnHint = [2, 2, 1, 1];
-    const columnIndex = 0;
-    tryFindDirectSolutionForColumn(columnHint, input, columnIndex);
-    should.deepEqual(expectedResult, input);
+    const columnSolution = tryFindDirectSolutionForRowOrColumn(columnHint, column);
+    columnToSolution(columnSolution, columnIndex, solutionSoFar);
+    should.deepEqual(expectedResult, solutionSoFar);
   });
 });
 
