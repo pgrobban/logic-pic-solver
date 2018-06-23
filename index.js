@@ -289,54 +289,29 @@ function getLongestNonXSequence(row) {
   }
 }
 
-function tryFindPartialSolutionForRow(rowHints, solution, rowIndex) {
-  if (rowHints.length === 1) {
-    const longestNonXSequence = getLongestNonXSequence(solution[rowIndex]);
-    if (rowHints[0] > (longestNonXSequence.length / 2)) {
+function tryFindPartialSolutionForRowOrColumn(rowOrColumnHints, solutionSoFar) {
+  const possibbleSolution = solutionSoFar;
+  if (rowOrColumnHints.length === 1) {
+    const longestNonXSequence = getLongestNonXSequence(possibbleSolution);
+    if (rowOrColumnHints[0] > (longestNonXSequence.length / 2)) {
       const fillFromIndex = longestNonXSequence.index + parseInt(longestNonXSequence.length / 2);
-      solution[rowIndex][fillFromIndex] = 'O';
+      possibbleSolution[fillFromIndex] = 'O';
 
-      const numberOfCellsToFillInEachDirection = parseInt((rowHints[0] - 2) / 2);
-
+      const numberOfCellsToFillInEachDirection = parseInt((rowOrColumnHints[0] - 2) / 2);
       let cellsFilledTotal = 0;
 
-      for (let cellIndex = fillFromIndex + 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex < solution[rowIndex].length; cellIndex++ , cellsFilled++) {
-        solution[rowIndex][cellIndex] = 'O';
+      for (let cellIndex = fillFromIndex + 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex < possibbleSolution.length; cellIndex++ , cellsFilled++) {
+        possibbleSolution[cellIndex] = 'O';
         cellsFilledTotal++;
       }
       for (let cellIndex = fillFromIndex - 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex >= 0; cellIndex-- , cellsFilled++) {
-        solution[rowIndex][cellIndex] = 'O';
+        possibbleSolution[cellIndex] = 'O';
         cellsFilledTotal++;
       }
     }
   }
+  return possibbleSolution;
 }
-
-function tryFindPartialSolutionForColumn(columnHints, solution, columnIndex) {
-  const columnAsArray = solution.map((row) => row[columnIndex]);
-  if (columnHints.length === 1) {
-    const longestNonXSequence = getLongestNonXSequence(columnAsArray);
-    if (columnHints[0] > (longestNonXSequence.length / 2)) {
-      const fillFromIndex = longestNonXSequence.index + parseInt(longestNonXSequence.length / 2);
-      columnAsArray[fillFromIndex] = 'O';
-
-      const numberOfCellsToFillInEachDirection = parseInt((columnHints[0] - 2) / 2);
-
-      let cellsFilledTotal = 0;
-
-      for (let cellIndex = fillFromIndex + 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex < solution[columnIndex].length; cellIndex++ , cellsFilled++) {
-        columnAsArray[cellIndex] = 'O';
-        cellsFilledTotal++;
-      }
-      for (let cellIndex = fillFromIndex - 1, cellsFilled = 0; cellsFilled < numberOfCellsToFillInEachDirection && cellIndex >= 0; cellIndex-- , cellsFilled++) {
-        columnAsArray[cellIndex] = 'O';
-        cellsFilledTotal++;
-      }
-    }
-  }
-  columnToSolution(columnAsArray, columnIndex, solution);
-}
-
 
 function fillInMissingCells(solution, fill = 'X') {
   for (const row in solution) {
@@ -409,14 +384,19 @@ export default function solve(level) {
       console.log("After sequential solutions\n", solution);
     }
 
-    rowHints.forEach((row, index) => tryFindPartialSolutionForRow(row, solution, index));
+    rowHints.forEach((row, rowIndex) => {
+      solution[rowIndex] = tryFindPartialSolutionForRowOrColumn(row, solution[rowIndex]);
+    });
     if (DEBUG === 2) {
-      console.log("After partial solutions row\n", solution);
+      console.log("After sequentials solutions row\n", solution);
     }
-
-    columnHints.forEach((column, index) => tryFindPartialSolutionForColumn(column, solution, index));
+    columnHints.forEach((columnHint, columnIndex) => {
+      const column = getColumn(solution, columnIndex);
+      const columnSolution = tryFindPartialSolutionForRowOrColumn(columnHint, column);
+      columnToSolution(columnSolution, columnIndex, solution);
+    });
     if (DEBUG) {
-      console.log("After partial solutions\n", solution);
+      console.log("After sequential solutions\n", solution);
     }
 
     // if no changes have been made, we break and return partial solution

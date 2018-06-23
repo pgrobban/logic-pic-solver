@@ -11,7 +11,7 @@ const columnToSolution = app.__get__('columnToSolution');
 const isValidSolution = app.__get__('isValidSolution');
 const fillInMissingCells = app.__get__('fillInMissingCells');
 const fillImpossibleMovesForRowOrColumn = app.__get__('fillImpossibleMovesForRowOrColumn');
-const tryFindPartialSolutionForRow = app.__get__('tryFindPartialSolutionForRow');
+const tryFindPartialSolutionForRowOrColumn = app.__get__('tryFindPartialSolutionForRowOrColumn');
 const tryFindSequentialSolutionForRowOrColumn = app.__get__('tryFindSequentialSolutionForRowOrColumn');
 const tryFindDirectSolutionForRowOrColumn = app.__get__('tryFindDirectSolutionForRowOrColumn');
 
@@ -157,7 +157,7 @@ describe('Try find sequential solution for row or column', () => {
     should.deepEqual(expectedResult, solutionSoFar);
   });
 
-  it('test case 2', () => {
+  it('test case 2 column', () => {
     const solutionSoFar = [
       [undefined],
       [undefined],
@@ -304,43 +304,29 @@ describe('Fill in impossible moves for row or column', () => {
   });
 });
 
-describe('Try find partial solutions for row', () => {
+describe('Try find partial solutions for row or column', () => {
   it('Test case 1', () => {
-    const solution = [
-      [undefined, undefined, undefined, undefined, undefined]
-    ];
-    const expectedResult = [
-      [undefined, undefined, 'O', undefined, undefined]
-    ];
-    const rowHints = [3];
-    const rowIndex = 0;
-    tryFindPartialSolutionForRow(rowHints, solution, rowIndex);
-    should.deepEqual(solution, expectedResult);
+    const input = [undefined, undefined, undefined, undefined, undefined];
+    const expectedResult = [undefined, undefined, 'O', undefined, undefined];
+    const rowHint = [3];
+    const actualResult = tryFindPartialSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
+
   it('Test case 2', () => {
-    const solution = [
-      [undefined, undefined, undefined, undefined, undefined]
-    ];
-    const expectedResult = [
-      [undefined, 'O', 'O', 'O', undefined]
-    ];
-    const rowHints = [4];
-    const rowIndex = 0;
-    tryFindPartialSolutionForRow(rowHints, solution, rowIndex);
-    should.deepEqual(solution, expectedResult);
+    const input = [undefined, undefined, undefined, undefined, undefined];
+    const expectedResult = [undefined, 'O', 'O', 'O', undefined];
+    const rowHint = [4];
+    const actualResult = tryFindPartialSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
   });
-  /* it('Test case 3', () => {
-    const solution = [
-      [undefined, undefined, undefined, undefined, undefined]
-    ];
-    const expectedResult = [
-      ['O', 'O', 'O', 'O', 'O']
-    ];
-    const rowHints = [5];
-    const rowIndex = 0;
-    tryFindPartialSolutionForRow(rowHints, solution, rowIndex);
-    should.deepEqual(solution, expectedResult);
-  }); */
+  it.skip('Test case 3', () => {
+    const input = [undefined, undefined, undefined, undefined, undefined];
+    const expectedResult = ['O', 'O', 'O', 'O', 'O'];
+    const rowHint = [5];
+    const actualResult = tryFindPartialSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
 });
 
 describe('Solver', () => {
