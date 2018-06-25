@@ -1,0 +1,9 @@
+{
+  "env": {
+    "es6": true,
+    "commonjs": true
+  },
+  "parserOptions": {
+    "sourceType": "module"
+  }
+}

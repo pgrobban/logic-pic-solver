@@ -532,4 +532,11 @@ describe('Solver', () => {
     const actualSolution = solve(LEVELS.EASY[7]);
     should.deepEqual(expectedSolution, actualSolution);
   });
+
+  it.skip('Should solve daily puzzle for June 25, 2018', () => {
+    const expectedSolution = [
+    ];
+    const actualSolution = solve(LEVELS.DAILY_LEVELS[0]);
+    should.deepEqual(expectedSolution, actualSolution);
+  });
 })

@@ -46,6 +46,7 @@ function tryFindDirectSolutionForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar)
   const rowHintsSum = rowOrColumnHints.reduce((accumulator, currentValue, currentIndex) => {
     return accumulator + currentValue + (currentIndex === rowOrColumnHints.length - 1 ? 0 : 1);
   }, 0);
+
   if (rowHintsSum === possibleSolution.length) {
     let fillIndex = 0;
     for (let hintsIndex = 0; hintsIndex < rowOrColumnHints.length; hintsIndex++) {
@@ -329,12 +330,8 @@ function fillInMissingCells(solution, fill = 'X') {
 export default function solve(level) {
   const { columnHints, rowHints } = level;
 
-  if (columnHints.length !== rowHints.length) {
-    throw new Error('COlumns and rows lengths must match');
-  }
-
-  // init nxn solution array
-  let solution = [...Array(columnHints.length)];
+  // init row x column solution array
+  let solution = [...Array(rowHints.length)];
   solution = solution.map(row => [...Array(columnHints.length)]);
 
   while (true) {
