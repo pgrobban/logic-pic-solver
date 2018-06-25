@@ -56,6 +56,14 @@ describe('try find direct solution for row', () => {
     should.deepEqual(expectedResult, actualResult);
   });
 
+  it.only('Test case 6', () => {
+    const input = [undefined, undefined, 'O', 'O', undefined, 'O', undefined];
+    const expectedResult = ['X', 'X', 'O', 'O', 'X', 'O', 'X'];
+    const rowHint = [2, 2];
+    const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
+
   it('Test case 1 column', () => {
     const solutionSoFar = [
       ['X'],
@@ -549,6 +557,13 @@ describe('Solver', () => {
 
   it.skip('Should solve Easy 20', () => {
     const expectedSolution = [
+      [ 'X', 'O', 'X', 'O', 'O', 'X', 'X' ],
+      [ 'X', 'O', 'O', 'O', 'O', 'O', 'X' ],
+      [ 'O', 'X', 'X', '?', 'X', 'X', 'O' ],
+      [ 'O', 'O', 'O', 'O', 'O', 'O', 'O' ],
+      [ 'X', 'O', 'X', 'X', 'X', 'O', 'X' ],
+      [ 'O', 'X', 'X', 'X', 'O', 'X', 'X' ],
+      [ 'O', 'O', 'O', 'O', 'X', 'X', 'X' ]
     ];
     const actualSolution = solve(LEVELS.EASY.find((level => level.name === '20')));
     should.deepEqual(expectedSolution, actualSolution);
