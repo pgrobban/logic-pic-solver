@@ -235,6 +235,38 @@ function fillPossibleOFromMiddleMinusOneToLeftAndRestWithX(foundFirstOCellIndex,
   return possibleSolution;
 }
 
+function getOIntervals(rowOrColumnSoFar) {
+  const oIntervals = [];
+  let isInOInterval = false;
+  let currentIntervalIndex = 0;
+  let cellIndex = 0
+
+  // find start of intervals with already filled Os
+  for (; cellIndex < rowOrColumnSoFar.length; cellIndex++) {
+    if (rowOrColumnSoFar[cellIndex] === 'O') {
+      if (isInOInterval) {
+        oIntervals[currentIntervalIndex].length++;
+      } else {
+        oIntervals.push({
+          startIndex: cellIndex,
+          length: 1
+        });
+        isInOInterval = true;
+      }
+    } else {
+      if (isInOInterval) {
+        oIntervals[currentIntervalIndex].endIndex = (cellIndex === 0 ? 0 : cellIndex - 1);
+        currentIntervalIndex++;
+      }
+      isInOInterval = false;
+    }
+  }
+  if (isInOInterval) {
+    oIntervals[currentIntervalIndex].endIndex = cellIndex - 1;
+  }
+  return oIntervals;
+}
+
 function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
   let possibleSolution = rowOrColumnSoFar;
   const numberOfKnownOsInRow = rowOrColumnSoFar.filter((cell) => cell === 'O').length;
@@ -253,6 +285,51 @@ function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
       possibleSolution = fillPossibleOFromMiddlePlusOneToRightAndRestWithX(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, possibleSolution);
       possibleSolution = fillPossibleOFromMiddleMinusOneToLeftAndRestWithX(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, possibleSolution);
     }
+  } else {
+    const oIntervals = getOIntervals(possibleSolution);
+
+    // see if possible to fill left and right ends
+    if (oIntervals.length === rowOrColumnHints.length) {
+      const cellsToFillInFirstInterval = rowOrColumnHints[0];
+      const cellsToFillInLastInterval = rowOrColumnHints[rowOrColumnHints.length - 1];
+      const cellsToFillInSecondToLastInterval = rowOrColumnHints[rowOrColumnHints.length - 2];
+      const firstOInterval = oIntervals[0];
+      const lastOInterval = oIntervals[oIntervals.length - 1];
+      const secondToLastOInterval = oIntervals[oIntervals.length - 2];
+
+      let firstXCellToFillLeft, firstXCellToFillRight, lastXCellToFillRight;
+
+      if (firstOInterval.length === cellsToFillInFirstInterval) {
+        firstXCellToFillLeft = firstOInterval.startIndex - 1;
+      } else {
+        const numberOfPossibleOsInBothDirections = rowOrColumnHints[0] - firstOInterval.length;
+        firstXCellToFillLeft = firstOInterval.startIndex - numberOfPossibleOsInBothDirections;
+      }
+
+      for (let cellToFillIn = firstXCellToFillLeft; cellToFillIn >= 0; cellToFillIn--) {
+        possibleSolution[cellToFillIn] = 'X';
+      }
+
+      if (lastOInterval.length === cellsToFillInLastInterval) {
+        lastXCellToFillRight = lastOInterval.startIndex - 1;
+      } else {
+        const numberOfPossibleOsInBothDirections = cellsToFillInLastInterval - lastOInterval.length;
+        lastXCellToFillRight = lastOInterval.startIndex - numberOfPossibleOsInBothDirections;
+      }
+
+      if (secondToLastOInterval.length === cellsToFillInSecondToLastInterval) {
+        firstXCellToFillRight = secondToLastOInterval.endIndex + 1;
+      } else {
+        const numberOfPossibleOsInBothDirections = cellsToFillInSecondToLastInterval - secondToLastOInterval.length;
+        firstXCellToFillRight = secondToLastOInterval.endIndex + numberOfPossibleOsInBothDirections;
+      }
+
+      for (let cellToFillIn = firstXCellToFillRight; cellToFillIn <= lastXCellToFillRight; cellToFillIn++) {
+        possibleSolution[cellToFillIn] = 'X';
+      }
+    }
+
+    return possibleSolution;
   }
 
   possibleSolution.forEach((cell, cellIndex) => {

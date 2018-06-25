@@ -312,7 +312,7 @@ describe('Fill in impossible moves for row or column', () => {
     should.deepEqual(expectedResult, actualResult);
   });
 
-  it.skip('Test case 6', () => {
+  it.only('Test case 6', () => {
     const input = [undefined, undefined, 'O', 'O', undefined, 'O', undefined];
     const expectedResult = ['X', 'X', 'O', 'O', 'X', 'O', undefined];
     const rowHint = [2, 2];
