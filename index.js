@@ -191,7 +191,7 @@ function isValidSolution(level, solution) {
   return true;
 }
 
-function fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solutionSoFar) {
+function fillPossibleOFromMiddlePlusOneToRightAndRestWithX(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solutionSoFar) {
   const possibleSolution = solutionSoFar;
   let cellIndex = foundFirstOCellIndex + 1;
   for (let cellsFilledWithPossibleO = 0;
@@ -212,7 +212,7 @@ function fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPos
   return possibleSolution;
 }
 
-function fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solutionSoFar) {
+function fillPossibleOFromMiddleMinusOneToLeftAndRestWithX(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, solutionSoFar) {
   const possibleSolution = solutionSoFar;
   let cellIndex = foundFirstOCellIndex - 1;
 
@@ -250,16 +250,16 @@ function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
     const foundFirstOCellIndex = possibleSolution.findIndex((cell) => cell === 'O');
     if (foundFirstOCellIndex !== -1) {
       const numberOfPossibleOToFillInOneDirection = rowOrColumnHints[0] - 1;
-      possibleSolution = fillPossibleOFromMiddlePlusOneToRight(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, possibleSolution);
-      possibleSolution = fillPossibleOFromMiddleMinusOneToLeft(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, possibleSolution);
-
-      possibleSolution.forEach((cell, cellIndex) => {
-        if (cell === 'Possible O') {
-          possibleSolution[cellIndex] = undefined;
-        }
-      });
+      possibleSolution = fillPossibleOFromMiddlePlusOneToRightAndRestWithX(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, possibleSolution);
+      possibleSolution = fillPossibleOFromMiddleMinusOneToLeftAndRestWithX(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, possibleSolution);
     }
   }
+
+  possibleSolution.forEach((cell, cellIndex) => {
+    if (cell === 'Possible O') {
+      possibleSolution[cellIndex] = undefined;
+    }
+  });
   return possibleSolution;
 }
 

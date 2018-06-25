@@ -56,13 +56,14 @@ describe('try find direct solution for row', () => {
     should.deepEqual(expectedResult, actualResult);
   });
 
+  /*
   it.only('Test case 6', () => {
     const input = [undefined, undefined, 'O', 'O', undefined, 'O', undefined];
     const expectedResult = ['X', 'X', 'O', 'O', 'X', 'O', 'X'];
     const rowHint = [2, 2];
     const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
     should.deepEqual(expectedResult, actualResult);
-  });
+  }); */
 
   it('Test case 1 column', () => {
     const solutionSoFar = [
@@ -307,6 +308,14 @@ describe('Fill in impossible moves for row or column', () => {
     const input = ['O', 'O', 'X', 'O', undefined];
     const expectedResult = ['O', 'O', 'X', 'O', 'X'];
     const rowHint = [2, 1];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
+
+  it.skip('Test case 6', () => {
+    const input = [undefined, undefined, 'O', 'O', undefined, 'O', undefined];
+    const expectedResult = ['X', 'X', 'O', 'O', 'X', 'O', undefined];
+    const rowHint = [2, 2];
     const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
     should.deepEqual(expectedResult, actualResult);
   });
