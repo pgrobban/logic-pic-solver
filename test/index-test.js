@@ -547,6 +547,21 @@ describe('Solver', () => {
     should.deepEqual(expectedSolution, actualSolution);
   });
 
+  it.skip('Should solve Easy 20', () => {
+    const expectedSolution = [
+    ];
+    const actualSolution = solve(LEVELS.EASY.find((level => level.name === '20')));
+    should.deepEqual(expectedSolution, actualSolution);
+  });
+
+  it.skip('Should solve Easy 40', () => {
+    const expectedSolution = [
+    ];
+    const actualSolution = solve(LEVELS.EASY.find((level => level.name === '40')));
+    should.deepEqual(expectedSolution, actualSolution);
+  });
+
+
   it.skip('Should solve daily puzzle for June 25, 2018', () => {
     const expectedSolution = [
     ];
