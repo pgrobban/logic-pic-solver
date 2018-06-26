@@ -138,13 +138,14 @@ function tryFindDirectIntervalSolutionForRowOrColumn(rowOrColumnHints, rowOrColu
   const hintFulFilledIndices = [];
   let cellIndexToStart = 0;
   rowOrColumnHints.forEach((hint, hintIndex) => {
+    console.log("*** checking", hint, hintIndex)
     let oStreak = 0;
     for (let cellIndex = cellIndexToStart; cellIndex < possibleSolution.length; cellIndex++) {
       if (possibleSolution[cellIndex] === 'O') {
         oStreak++;
       }
 
-      if (oStreak === hint) {
+      if (oStreak === hint && possibleSolution[cellIndex + 1] !== 'O') {
         hintFulFilledIndices.push(hintIndex);
         cellIndexToStart = cellIndex + 1;
         break;
@@ -152,7 +153,10 @@ function tryFindDirectIntervalSolutionForRowOrColumn(rowOrColumnHints, rowOrColu
     }
   });
 
+  console.log("***", hintFulFilledIndices)
   const hintsIndicesNotFulFilled = pull(rowOrColumnHints.map((hint, index) => index), ...hintFulFilledIndices);
+  console.log('***', hintsIndicesNotFulFilled);
+
 
   hintsIndicesNotFulFilled.forEach((hintNotFulfilledIndex) => {
     const oAndUnknownIntervalsOfHintLength = getIntervalsWithPredicateAndLength(possibleSolution, (cell) => cell !== 'X', rowOrColumnHints[hintNotFulfilledIndex]);
@@ -167,8 +171,8 @@ function tryFindDirectIntervalSolutionForRowOrColumn(rowOrColumnHints, rowOrColu
       return !intervalFilled;
     });
 
-    const possibleToFillFrom = unfilledPossibleOIntervals.length === 1;
-    if (possibleToFillFrom) {
+    const possibleToFill = unfilledPossibleOIntervals.length === 1;
+    if (possibleToFill) {
       const interval = unfilledPossibleOIntervals[0];
       for (let cellIndex = interval.startIndex; cellIndex <= interval.endIndex; cellIndex++) {
         possibleSolution[cellIndex] = 'O';

@@ -112,7 +112,7 @@ describe('try find direct solution for row', () => {
     should.deepEqual(expectedResult, actualResult);
   });
 
-  it.only('Test case 12', () => {
+  it('Test case 12', () => {
     const input = ['O', 'O', 'X', undefined, undefined, 'X', undefined, 'X', 'O', 'O'];
     const expectedResult = ['O', 'O', 'X', undefined, undefined, 'X', 'O', 'X', 'O', 'O'];
     const rowHint = [2, 1, 1, 2];
