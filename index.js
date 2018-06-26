@@ -1,4 +1,4 @@
-import { sum, sumBy, cloneDeep, isEqual, last } from 'lodash';
+import { sum, sumBy, cloneDeep, isEqual, last, pull } from 'lodash';
 const DEBUG = 2;
 
 function getColumn(solution, columnIndex) {
@@ -105,7 +105,7 @@ function tryFindDirectIntervalSolutionForRowOrColumn(rowOrColumnHints, rowOrColu
     for (let hintIndex = 0; hintIndex < rowOrColumnHints.length; hintIndex++) {
       if (xIntervalStartIndices[hintIndex + 1] && (xIntervalStartIndices[hintIndex + 1] - xIntervalStartIndices[hintIndex] === 1)) {
         xIntervalIndex++;
-        continue;a
+        continue; a
       }
       if (isEqual(rowOrColumnHints[hintIndex], lengthsOfIntervalsBetweenXs[hintIndex])) {
         for (let cellToFillIndexOffsetFromStartOfInterval = 0; cellToFillIndexOffsetFromStartOfInterval < rowOrColumnHints[hintIndex]; cellToFillIndexOffsetFromStartOfInterval++) {
@@ -117,46 +117,64 @@ function tryFindDirectIntervalSolutionForRowOrColumn(rowOrColumnHints, rowOrColu
   }
 
   // see if possible to fill from right
-  const lastHint = rowOrColumnHints[rowOrColumnHints.length - 1];
+  // const lastHint = rowOrColumnHints[rowOrColumnHints.length - 1];
 
-  // find interval from right that contains possible O that is length of last hint
-  let possibleStartIndexToFillLastInterval;
-  for (let cellIndex = possibleSolution.length - 1; cellIndex > 0; cellIndex--) {
-    let possibleToFillInterval = true;
-    for (let cellIndex2 = cellIndex; cellIndex2 > (cellIndex - lastHint); cellIndex2--) {
-      if (possibleSolution[cellIndex2] === 'X') {
-        possibleToFillInterval = false;
-      }
-    }
-    if (possibleToFillInterval) {
-      possibleStartIndexToFillLastInterval = cellIndex - lastHint + 1;
-      break;
-    }
-  }
+  /* // find interval from right that contains possible O that is length of last hint
+   let possibleStartIndexToFillLastInterval;
+   for (let cellIndex = possibleSolution.length - 1; cellIndex > 0; cellIndex--) {
+     let possibleToFillInterval = true;
+     for (let cellIndex2 = cellIndex; cellIndex2 > (cellIndex - lastHint); cellIndex2--) {
+       if (possibleSolution[cellIndex2] === 'X') {
+         possibleToFillInterval = false;
+       }
+     }
+     if (possibleToFillInterval) {
+       possibleStartIndexToFillLastInterval = cellIndex - lastHint + 1;
+       break;
+     }
+   } */
 
   // check if it's possible to fill with Os in the end.
-  const oAndUnknownIntervals = getIntervalsWithPredicateAndLength(possibleSolution, (cell) => cell !== 'X', lastHint);
-  const unfilledPossibleOIntervals = oAndUnknownIntervals.filter((interval) => {
-    let intervalFilled = true;
+  const hintFulFilledIndices = [];
+  let cellIndexToStart = 0;
+  rowOrColumnHints.forEach((hint, hintIndex) => {
+    let oStreak = 0;
+    for (let cellIndex = cellIndexToStart; cellIndex < possibleSolution.length; cellIndex++) {
+      if (possibleSolution[cellIndex] === 'O') {
+        oStreak++;
+      }
 
-    for (let cellIndex = interval.startIndex; cellIndex <= interval.endIndex; cellIndex++) {
-      if (!possibleSolution[cellIndex]) {
-        intervalFilled = false;
+      if (oStreak === hint) {
+        hintFulFilledIndices.push(hintIndex);
+        cellIndexToStart = cellIndex + 1;
+        break;
       }
     }
-    return !intervalFilled;
   });
 
-  console.log('***', unfilledPossibleOIntervals);
+  const hintsIndicesNotFulFilled = pull(rowOrColumnHints.map((hint, index) => index), ...hintFulFilledIndices);
 
+  hintsIndicesNotFulFilled.forEach((hintNotFulfilledIndex) => {
+    const oAndUnknownIntervalsOfHintLength = getIntervalsWithPredicateAndLength(possibleSolution, (cell) => cell !== 'X', rowOrColumnHints[hintNotFulfilledIndex]);
+    const unfilledPossibleOIntervals = oAndUnknownIntervalsOfHintLength.filter((interval) => {
+      let intervalFilled = true;
 
-  const possibleToFillFromRight = unfilledPossibleOIntervals.length === 1;
-  if (possibleToFillFromRight) {
-    const interval = unfilledPossibleOIntervals[0];
-    for (let cellIndex = interval.startIndex; cellIndex <= interval.endIndex; cellIndex++) {
-      possibleSolution[cellIndex] = 'O';
+      for (let cellIndex = interval.startIndex; cellIndex <= interval.endIndex; cellIndex++) {
+        if (!possibleSolution[cellIndex]) {
+          intervalFilled = false;
+        }
+      }
+      return !intervalFilled;
+    });
+
+    const possibleToFillFrom = unfilledPossibleOIntervals.length === 1;
+    if (possibleToFillFrom) {
+      const interval = unfilledPossibleOIntervals[0];
+      for (let cellIndex = interval.startIndex; cellIndex <= interval.endIndex; cellIndex++) {
+        possibleSolution[cellIndex] = 'O';
+      }
     }
-  }
+  });
 
   return possibleSolution;
 }
