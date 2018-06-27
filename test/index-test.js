@@ -88,7 +88,7 @@ describe('try find direct solution for row', () => {
     should.deepEqual(expectedResult, actualResult);
   });
 
-  it('Test case 9 should leave inpout untouched', () => {
+  it('Test case 9 should leave input untouched', () => {
     const input = [undefined, undefined, undefined, undefined, undefined];
     const expectedResult = [undefined, undefined, undefined, undefined, undefined];
     const rowHint = [3];
@@ -119,6 +119,30 @@ describe('try find direct solution for row', () => {
     const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
     should.deepEqual(expectedResult, actualResult);
   });
+
+  it('Test case 13 should leave input untouched', () => {
+    const input = ['X', 'O', 'X', undefined, undefined, undefined, 'X'];
+    const expectedResult = ['X', 'O', 'X', undefined, undefined, undefined, 'X'];
+    const rowHint = [1, 2];
+    const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
+
+  it('Test case 14', () => {
+    const input = ['X', 'O', 'X', undefined, undefined, 'O', 'X'];
+    const expectedResult = ['X', 'O', 'X', undefined, 'O', 'O', 'X'];
+    const rowHint = [1, 2];
+    const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
+
+  /* it('Test case 15', () => {
+    const input = [undefined, 'O', undefined, 'O', undefined, undefined, 'O'];
+    const expectedResult = [undefined, 'O', undefined, 'O', undefined, undefined, 'O']
+    const rowHint = [2, 1, 1];
+    const actualResult = tryFindDirectSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  }); */
 
   it('Test case 1 column', () => {
     const solutionSoFar = [
@@ -201,6 +225,14 @@ describe('Try find sequential solution for row or column', () => {
     const input = [undefined, 'X', 'X', undefined, undefined];
     const expectedResult = [undefined, 'X', 'X', undefined, undefined];
     const rowHint = [2];
+    const actualResult = tryFindSequentialSolutionForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
+
+  it('Test case 4 should leave input untouched', () => {
+    const input = [ 'X', 'O', 'X', undefined, undefined, undefined, undefined ];
+    const expectedResult = [ 'X', 'O', 'X', undefined, undefined, undefined, undefined ];
+    const rowHint = [1, 1];
     const actualResult = tryFindSequentialSolutionForRowOrColumn(rowHint, input);
     should.deepEqual(expectedResult, actualResult);
   });
@@ -383,9 +415,9 @@ describe('Fill in impossible moves for row or column', () => {
     should.deepEqual(expectedResult, actualResult);
   });
 
-  it('Test case 6', () => {
+  it.skip('Test case 6', () => {
     const input = [undefined, undefined, 'O', 'O', undefined, 'O', undefined];
-    const expectedResult = ['X', 'X', 'O', 'O', 'X', 'O', undefined];
+    const expectedResult = ['X', 'X', 'O', 'O', 'X', 'O', 'X'];
     const rowHint = [2, 2];
     const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
     should.deepEqual(expectedResult, actualResult);
@@ -403,6 +435,46 @@ describe('Fill in impossible moves for row or column', () => {
     const input = ['O', 'O', undefined, 'O', undefined, undefined, 'X'];
     const expectedResult = ['O', 'O', 'X', 'O', 'X', undefined, 'X'];
     const rowHint = [2, 1, 1];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
+
+  it('Test case 9 should leave input untouched', () => {
+    const input = ['X', 'O', 'X', undefined, undefined, 'O', 'X'];
+    const expectedResult = ['X', 'O', 'X', undefined, undefined, 'O', 'X'];
+    const rowHint = [1, 2];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
+
+  it('Test case 10 should leave input untouched', () => {
+    const input = [ 'X', 'O', 'X', undefined, undefined, undefined, undefined ];
+    const expectedResult = [ 'X', 'O', 'X', undefined, undefined, undefined, undefined ];
+    const rowHint = [1, 1];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
+
+  it.only('Test case 11 should leave input untouched', () => {
+    const input = ['X', undefined, undefined, undefined, 'O', undefined, undefined, 'X'];
+    const expectedResult = [ undefined, undefined, undefined, 'O', undefined, undefined, 'X'];
+    const rowHint = [2, 1, 1];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
+
+  it('Test case 12', () => {
+    const input = [undefined, 'O', undefined, undefined, undefined, undefined, undefined];
+    const expectedResult = [undefined, 'O', undefined, undefined, undefined, 'X', 'X'];
+    const rowHint = [4];
+    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
+    should.deepEqual(expectedResult, actualResult);
+  });
+
+  it('Test case 13 should leave input untouched', () => {
+    const input =  [undefined, undefined, undefined, 'O', undefined, undefined, 'X' ];
+    const expectedResult =  [ undefined, undefined, undefined, 'O', undefined, undefined, 'X' ];
+    const rowHint = [1, 2];
     const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
     should.deepEqual(expectedResult, actualResult);
   });

@@ -138,7 +138,7 @@ function tryFindDirectIntervalSolutionForRowOrColumn(rowOrColumnHints, rowOrColu
   const hintFulFilledIndices = [];
   let cellIndexToStart = 0;
   rowOrColumnHints.forEach((hint, hintIndex) => {
-    console.log("*** checking", hint, hintIndex)
+    // console.log("*** checking", hint, hintIndex)
     let oStreak = 0;
     for (let cellIndex = cellIndexToStart; cellIndex < possibleSolution.length; cellIndex++) {
       if (possibleSolution[cellIndex] === 'O') {
@@ -153,10 +153,9 @@ function tryFindDirectIntervalSolutionForRowOrColumn(rowOrColumnHints, rowOrColu
     }
   });
 
-  console.log("***", hintFulFilledIndices)
+ // console.log("***", hintFulFilledIndices)
   const hintsIndicesNotFulFilled = pull(rowOrColumnHints.map((hint, index) => index), ...hintFulFilledIndices);
-  console.log('***', hintsIndicesNotFulFilled);
-
+ // console.log('***', hintsIndicesNotFulFilled);
 
   hintsIndicesNotFulFilled.forEach((hintNotFulfilledIndex) => {
     const oAndUnknownIntervalsOfHintLength = getIntervalsWithPredicateAndLength(possibleSolution, (cell) => cell !== 'X', rowOrColumnHints[hintNotFulfilledIndex]);
@@ -171,11 +170,21 @@ function tryFindDirectIntervalSolutionForRowOrColumn(rowOrColumnHints, rowOrColu
       return !intervalFilled;
     });
 
-    const possibleToFill = unfilledPossibleOIntervals.length === 1;
-    if (possibleToFill) {
+    const possibleToFillDirectly = unfilledPossibleOIntervals.length === 1;
+
+    if (possibleToFillDirectly) {
       const interval = unfilledPossibleOIntervals[0];
       for (let cellIndex = interval.startIndex; cellIndex <= interval.endIndex; cellIndex++) {
+        console.log('*** filling directly', cellIndex);
         possibleSolution[cellIndex] = 'O';
+      }
+    } else {
+      const lastNotFilledInterval = last(unfilledPossibleOIntervals);
+      if (lastNotFilledInterval && possibleSolution[lastNotFilledInterval.endIndex] === 'O') {
+        for (let cellIndex = lastNotFilledInterval.startIndex; cellIndex <= lastNotFilledInterval.endIndex; cellIndex++) {
+          console.log('*** filling ind', cellIndex);
+          possibleSolution[cellIndex] = 'O';
+        }
       }
     }
   });
@@ -224,6 +233,7 @@ function tryFindSequentialSolutionForRowOrColumn(rowOrColumnHints, rowOrColumnSo
       possibleSolution[cellIndex] = 'X';
     }
   }
+
   return possibleSolution;
 }
 
@@ -333,40 +343,10 @@ function getOIntervals(rowOrColumnSoFar) {
   return oIntervals;
 }
 
-function getUnknownIntervals(rowOrColumnSoFar) {
-  const unknownIntervals = [];
-  let isInUnknownInterval = false;
-  let currentIntervalIndex = 0;
-  let cellIndex = 0
-
-  // find start of intervals with already filled Os
-  for (; cellIndex < rowOrColumnSoFar.length; cellIndex++) {
-    if (!rowOrColumnSoFar[cellIndex]) {
-      if (isInUnknownInterval) {
-        unknownIntervals[currentIntervalIndex].length++;
-      } else {
-        unknownIntervals.push({
-          startIndex: cellIndex,
-          length: 1
-        });
-        isInUnknownInterval = true;
-      }
-    } else {
-      if (isInUnknownInterval) {
-        unknownIntervals[currentIntervalIndex].endIndex = (cellIndex === 0 ? 0 : cellIndex - 1);
-        currentIntervalIndex++;
-      }
-      isInUnknownInterval = false;
-    }
-  }
-  if (isInUnknownInterval) {
-    unknownIntervals[currentIntervalIndex].endIndex = cellIndex - 1;
-  }
-  return unknownIntervals;
-}
-
 
 function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
+  console.log('***', rowOrColumnHints, rowOrColumnSoFar);
+
   let possibleSolution = rowOrColumnSoFar;
 
   const numberOfKnownOsInRow = possibleSolution.filter((cell) => cell === 'O').length;
@@ -379,6 +359,9 @@ function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
     return possibleSolution;
   }
 
+  console.log('***', possibleSolution);
+
+
   if (rowOrColumnHints.length === 1) {
     const foundFirstOCellIndex = possibleSolution.findIndex((cell) => cell === 'O');
     if (foundFirstOCellIndex !== -1) {
@@ -387,72 +370,74 @@ function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
       possibleSolution = fillPossibleOFromMiddleMinusOneToLeftAndRestWithX(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, possibleSolution);
     }
   } else {
-    const oIntervals = getOIntervals(possibleSolution);
+    const hintsFulfilled = [];
+    let cellIndexToStart = 0;
+    rowOrColumnHints.forEach((hintLength, hintIndex) => {
+      // console.log("*** checking", hint, hintIndex)
+      let oStreak = 0;
+      for (let cellIndex = cellIndexToStart; cellIndex < possibleSolution.length; cellIndex++) {
+        if (possibleSolution[cellIndex] === 'O') {
+          oStreak++;
+        }
 
-    for (let oIntervalIndex = 0; oIntervalIndex < oIntervals.length; oIntervalIndex++) {
-      const interval = oIntervals[oIntervalIndex];
-      if (interval.length === rowOrColumnHints[oIntervalIndex]) {
+        if (oStreak === hintLength && possibleSolution[cellIndex + 1] !== 'O') {
+          hintsFulfilled.push({
+            hintIndex,
+            startOfSolutionIndex: cellIndex - hintLength + 1,
+            endOfSolutionIndex: cellIndex
+          });
+          cellIndexToStart = cellIndex + 1;
+          break;
+        }
+      }
+    });
+
+    hintsFulfilled.forEach((hintFulfilled) => {
+      if (hintFulfilled.startOfSolutionIndex > 0) {
+        possibleSolution[hintFulfilled.startOfSolutionIndex - 1] = 'X';
+      }
+
+      if (hintFulfilled.endOfSolutionIndex !== possibleSolution.length - 1) {
+        possibleSolution[hintFulfilled.endOfSolutionIndex + 1] = 'X';
+      }
+    });
+
+
+   // console.log("***", hintFulFilledIndices)
+  /*  const hintsIndicesNotFulFilled = pull(rowOrColumnHints.map((hint, index) => index), ...hintFulFilledIndices);
+   // console.log('***', hintsIndicesNotFulFilled);
+   console.log('*** NOT FULFILLED', hintsIndicesNotFulFilled);
+
+
+    hintsIndicesNotFulFilled.forEach((hintNotFulfilledIndex) => {
+      const oAndUnknownIntervalsOfHintLength = getIntervalsWithPredicateAndLength(possibleSolution, (cell) => cell !== 'X', rowOrColumnHints[hintNotFulfilledIndex]);
+      const unfilledPossibleOIntervals = oAndUnknownIntervalsOfHintLength.filter((interval) => {
+        let intervalFilled = true;
+
+        for (let cellIndex = interval.startIndex; cellIndex <= interval.endIndex; cellIndex++) {
+          if (!possibleSolution[cellIndex]) {
+            intervalFilled = false;
+          }
+        }
+        return !intervalFilled;
+      });
+
+      const possibleToFillXOnSides = unfilledPossibleOIntervals.length === 1;
+      console.log('*** possible', unfilledPossibleOIntervals);
+
+
+      if (possibleToFillXOnSides) {
+        const interval = unfilledPossibleOIntervals[0];
         if (interval.startIndex > 0) {
-          possibleSolution[interval.startIndex - 1] = 'X';
+          possibleSolution[interval.startIndex] = 'X';
         }
+
         if (interval.endIndex !== possibleSolution.length - 1) {
-          possibleSolution[interval.endIndex + 1] = 'X';
-        }
-      } else {
-        break;
-      }
-    }
-
-    // see if possible to fill left and right ends
-    if (oIntervals.length === rowOrColumnHints.length) {
-      const cellsToFillInFirstInterval = rowOrColumnHints[0];
-      const cellsToFillInLastInterval = rowOrColumnHints[rowOrColumnHints.length - 1];
-      const cellsToFillInSecondToLastInterval = rowOrColumnHints[rowOrColumnHints.length - 2];
-      const firstOInterval = oIntervals[0];
-      const lastOInterval = oIntervals[oIntervals.length - 1];
-      const secondToLastOInterval = oIntervals[oIntervals.length - 2];
-      const hintsSum = getHintsWithGapsSum(rowOrColumnHints);
-
-      let lastXCellToFillLeft, firstXCellToFillRight, lastXCellToFillRight;
-
-      if (firstOInterval.length === cellsToFillInFirstInterval) {
-        lastXCellToFillLeft = firstOInterval.startIndex - 1;
-      } else {
-
-        const numberOfPossibleOsInBothDirections = rowOrColumnHints[0] - firstOInterval.length;
-        lastXCellToFillLeft = firstOInterval.startIndex - numberOfPossibleOsInBothDirections;
-
-        if (hintsSum > firstOInterval.startIndex) {
-          lastXCellToFillLeft = -1;
+          possibleSolution[interval.endIndex] = 'X';
         }
       }
+    }); */
 
-      for (let cellToFillIn = lastXCellToFillLeft; cellToFillIn >= 0; cellToFillIn--) {
-        possibleSolution[cellToFillIn] = 'X';
-      }
-
-      if (lastOInterval.length === cellsToFillInLastInterval) {
-        lastXCellToFillRight = lastOInterval.startIndex - 1;
-      } else {
-        const numberOfPossibleOsInBothDirections = cellsToFillInLastInterval - lastOInterval.length;
-        lastXCellToFillRight = lastOInterval.startIndex - numberOfPossibleOsInBothDirections;
-      }
-
-      if (secondToLastOInterval.length === cellsToFillInSecondToLastInterval) {
-        firstXCellToFillRight = secondToLastOInterval.endIndex + 1;
-      } else {
-        const numberOfPossibleOsInBothDirections = cellsToFillInSecondToLastInterval - secondToLastOInterval.length;
-        firstXCellToFillRight = secondToLastOInterval.endIndex + numberOfPossibleOsInBothDirections;
-
-        if (hintsSum > firstOInterval.startIndex) {
-          firstXCellToFillRight = possibleSolution.length;
-        }
-      }
-
-      for (let cellToFillIn = firstXCellToFillRight; cellToFillIn <= lastXCellToFillRight; cellToFillIn++) {
-        possibleSolution[cellToFillIn] = 'X';
-      }
-    }
   }
 
   possibleSolution.forEach((cell, cellIndex) => {
@@ -460,6 +445,8 @@ function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
       possibleSolution[cellIndex] = undefined;
     }
   });
+  console.log('*** returning', possibleSolution);
+
   return possibleSolution;
 }
 
