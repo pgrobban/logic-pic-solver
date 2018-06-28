@@ -359,9 +359,6 @@ function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
     return possibleSolution;
   }
 
-  console.log('***', possibleSolution);
-
-
   if (rowOrColumnHints.length === 1) {
     const foundFirstOCellIndex = possibleSolution.findIndex((cell) => cell === 'O');
     if (foundFirstOCellIndex !== -1) {
@@ -370,6 +367,9 @@ function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
       possibleSolution = fillPossibleOFromMiddleMinusOneToLeftAndRestWithX(foundFirstOCellIndex, numberOfPossibleOToFillInOneDirection, possibleSolution);
     }
   } else {
+    console.log('*** =>', possibleSolution);
+
+
     const hintsFulfilled = [];
     let cellIndexToStart = 0;
     rowOrColumnHints.forEach((hintLength, hintIndex) => {
@@ -377,20 +377,37 @@ function fillImpossibleMovesForRowOrColumn(rowOrColumnHints, rowOrColumnSoFar) {
       let oStreak = 0;
       for (let cellIndex = cellIndexToStart; cellIndex < possibleSolution.length; cellIndex++) {
         if (possibleSolution[cellIndex] === 'O') {
+          console.log('*** streak', hintIndex);
+
           oStreak++;
+        } else {
+          oStreak = 0;
         }
 
         if (oStreak === hintLength && possibleSolution[cellIndex + 1] !== 'O') {
-          hintsFulfilled.push({
-            hintIndex,
-            startOfSolutionIndex: cellIndex - hintLength + 1,
-            endOfSolutionIndex: cellIndex
-          });
-          cellIndexToStart = cellIndex + 1;
-          break;
+          let otherPossibleSolutions = false;
+          for (let hint2Index = hintIndex; hint2Index < rowOrColumnHints.length; hint2Index++) {
+            if (rowOrColumnHints[hint2Index] > hintLength) {
+              otherPossibleSolutions = true;
+            }
+          }
+
+          if (!otherPossibleSolutions) {
+            hintsFulfilled.push({
+              hintIndex,
+              startOfSolutionIndex: cellIndex - hintLength + 1,
+              endOfSolutionIndex: cellIndex
+            });
+
+            cellIndexToStart = cellIndex + 1;
+            break;
+          }
         }
       }
     });
+
+    console.log('*** fulfilled', hintsFulfilled);
+
 
     hintsFulfilled.forEach((hintFulfilled) => {
       if (hintFulfilled.startOfSolutionIndex > 0) {

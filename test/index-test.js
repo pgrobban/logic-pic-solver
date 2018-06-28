@@ -455,14 +455,6 @@ describe('Fill in impossible moves for row or column', () => {
     should.deepEqual(expectedResult, actualResult);
   });
 
-  it.only('Test case 11 should leave input untouched', () => {
-    const input = ['X', undefined, undefined, undefined, 'O', undefined, undefined, 'X'];
-    const expectedResult = [ undefined, undefined, undefined, 'O', undefined, undefined, 'X'];
-    const rowHint = [2, 1, 1];
-    const actualResult = fillImpossibleMovesForRowOrColumn(rowHint, input);
-    should.deepEqual(expectedResult, actualResult);
-  });
-
   it('Test case 12', () => {
     const input = [undefined, 'O', undefined, undefined, undefined, undefined, undefined];
     const expectedResult = [undefined, 'O', undefined, undefined, undefined, 'X', 'X'];
